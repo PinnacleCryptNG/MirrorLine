@@ -1,14 +1,14 @@
 # Architecture
 
-Milestone 8 sits on the completed investigation stack. The report assembler does not call Bitget and does not reinterpret evidence. It packages the currently loaded pack, brief, challenge, and revision trail, then serializes JSON, Markdown, and print-friendly HTML.
+Milestone 9 sits on the investigation stack and Milestone 8 report assembly. Multi-symbol comparison does not call Bitget during export. It scores the same structured claims against each already-loaded pack and brief, then serializes JSON, Markdown, and print-friendly HTML.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/report (investigation report export)
-      → lib/composer (structured claim composer)
-      → lib/revision (thesis revision loop)
-      → lib/challenge (interpretation challenge)
+    → lib/compare (multi-symbol comparison)
+      → lib/report (per-symbol report assembly + sanitization)
+      → lib/composer (shared structured claims)
+      → lib/challenge
         → lib/brief
           → lib/evidence
             → lib/market
@@ -16,12 +16,14 @@ Browser
                 → https://api.bitget.com
 ```
 
-Export never refreshes the snapshot. Report creation time is stored separately from Bitget observation timestamps.
+Snapshot loads (GET `/api/market/snapshot/{symbol}`) stay explicit user actions. Comparison export only accepts posted packs/briefs/claims.
 
 ## Layout
 
-- `lib/report/types.ts` — InvestigationReport model and disclaimers
-- `lib/report/assemble.ts` — deterministic assembly from loaded models
-- `lib/report/markdown.ts` / `html.ts` / `json.ts` — serializers
-- `app/api/market/report/[symbol]/route.ts` — POST-only export of posted models
-- `components/investigation-report-panel.tsx` — desk preview and download/print controls
+- `lib/compare/types.ts` — ComparisonReport model
+- `lib/compare/symbols.ts` — normalize, duplicate, and bounds checks
+- `lib/compare/score.ts` — shared claims → existing composer engine
+- `lib/compare/table.ts` — claim rows × symbol columns
+- `lib/compare/assemble.ts` — recomputes challenges; does not trust client statuses
+- `app/api/market/compare/report/route.ts` — POST-only export
+- `components/multi-symbol-comparison-panel.tsx` — desk UI

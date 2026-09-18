@@ -2,7 +2,7 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 8 — Investigation Report Export** for the Bitget AI × Crypto Hackathon Genesis Season 2.
+This repository currently ships **Milestone 9 — Multi-symbol Comparison Report** for the Bitget AI × Crypto Hackathon Genesis Season 2.
 
 It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
@@ -16,6 +16,7 @@ It does not tell anyone what to buy or sell. It does not place orders. It does n
 - Revise that thesis and **diff before/after challenges**, keeping claim identity across reorders and light edits
 - Compose **structured claims** with explicit kinds and fields, then challenge them without treating the type as proof
 - Export a **non-advisory investigation report** (preview, Markdown, JSON, print-friendly HTML) from the currently loaded snapshot
+- Compare the **same structured claims across multiple rTokens** with independently labeled snapshots and export a comparison report
 - Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
 - Trace each item to a Bitget source field, timestamp, and freshness window
 - Keep missing, stale, failed, and unverified data as explicit UNKNOWN or stale FACT items
@@ -72,11 +73,12 @@ Other server routes:
 - `POST /api/market/revision/rAAPL` — thesis revision diff (`{ previous, thesis?, current?, sequence? }`)
 - `POST /api/market/composer/rAAPL` — structured claim challenge (`{ claims, freeText?, reason?, assumptions? }`)
 - `POST /api/market/report/rAAPL` — investigation report from loaded models (`{ pack, brief, challenge?, revisions?, context? }`, `?format=json|markdown|html`)
+- `POST /api/market/compare/report` — multi-symbol comparison report from loaded models (`{ symbols, claims, freeText? }`, `?format=json|markdown|html`)
 - `GET /api/market/orderbook/rAAPL`
 
 ## Architecture
 
-Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`. The interpretation challenge lives in `lib/challenge/`. Thesis revisions live in `lib/revision/`. Structured claims live in `lib/composer/` and render into the existing challenge engine. Investigation reports live in `lib/report/` and only assemble already-loaded models.
+Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`. The interpretation challenge lives in `lib/challenge/`. Thesis revisions live in `lib/revision/`. Structured claims live in `lib/composer/` and render into the existing challenge engine. Investigation reports live in `lib/report/` and only assemble already-loaded models. Multi-symbol comparison lives in `lib/compare/` and scores shared claims against each symbol's own loaded snapshot.
 
 See `docs/BITGET.md` and `ENVIRONMENT.md`.
 
@@ -87,6 +89,7 @@ See `docs/BITGET.md` and `ENVIRONMENT.md`.
 - Missing evidence does not disprove a thesis.
 - Selecting a structured claim type does not make the assertion a verified fact.
 - Export does not refresh Bitget. Report creation time is labeled separately from evidence timestamps.
+- Comparison columns are independent snapshots. The same claim can be supported on one symbol and unsupported on another.
 - Intraday or unspecified price direction is unassessed because the pack only classifies 24-hour change.
 - Reality-specific order book and platform fills require Bitget API credentials and may still need UID whitelist access.
 - Bitget session endpoints return schedules; current session is an inference from those schedules plus the calendar.

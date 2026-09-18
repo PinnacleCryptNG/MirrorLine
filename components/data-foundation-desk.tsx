@@ -6,6 +6,7 @@ import { EvidencePackPanel } from "@/components/evidence-pack-panel";
 import { InvestigationBriefPanel } from "@/components/investigation-brief-panel";
 import { InterpretationChallengePanel } from "@/components/interpretation-challenge-panel";
 import { InvestigationReportPanel } from "@/components/investigation-report-panel";
+import { MultiSymbolComparisonPanel } from "@/components/multi-symbol-comparison-panel";
 import { buildEvidencePack } from "@/lib/evidence/pack";
 import { buildInvestigationBrief } from "@/lib/brief/generate";
 import type { InterpretationChallenge } from "@/lib/challenge/types";
@@ -150,11 +151,11 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 8</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Report Export</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 9</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Multi-symbol Comparison Report</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Package the currently loaded evidence pack, brief, structured challenge, and revision trail as a
-            non-advisory report. Export does not refresh Bitget or invent a US tape.
+            Apply the same structured claims across independently loaded rToken snapshots. This desk does not rank
+            symbols, refresh Bitget during export, or invent a shared tape.
           </p>
         </div>
         <form
@@ -238,6 +239,8 @@ export function DataFoundationDesk({
           setRevisions(state.history);
         }}
       />
+
+      <MultiSymbolComparisonPanel />
 
       <InvestigationReportPanel
         pack={pack}

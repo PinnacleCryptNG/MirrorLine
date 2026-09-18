@@ -113,6 +113,14 @@ Report creation time is stored separately from evidence `retrievedAt` / `observe
 
 `POST /api/market/report/{symbol}?format=json|markdown|html` accepts `{ pack, brief, challenge?, revisions?, context?, question?, createdAt? }`. Omitting the loaded pack is a 400, not a live refresh.
 
+## Multi-symbol comparison (Milestone 9)
+
+`lib/compare/` scores the same structured claims against each selected rToken's own loaded pack and brief. It does not call Bitget during export and does not invent a shared observation time.
+
+A supported cell on one symbol does not support another. Failed snapshots stay unavailable for that column. The comparison is not a ranking.
+
+`POST /api/market/compare/report?format=json|markdown|html` accepts `{ symbols, claims, freeText? }`. Challenges are recomputed from the supplied packs, briefs, and shared claims. Client-supplied statuses are ignored.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

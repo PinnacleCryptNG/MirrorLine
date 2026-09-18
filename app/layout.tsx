@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Investigation Report Export",
+  title: "Mirrorline · Multi-symbol Comparison",
   description:
-    "Milestone 8 of Mirrorline: export a non-advisory rToken investigation report from the currently loaded evidence snapshot.",
+    "Milestone 9 of Mirrorline: compare the same structured claims across independently loaded rToken evidence snapshots. Non-advisory.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

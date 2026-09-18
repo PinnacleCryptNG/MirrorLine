@@ -28,6 +28,10 @@ import { assembleInvestigationReport } from "@/lib/report/assemble";
 import { serializeInvestigationReportHtml } from "@/lib/report/html";
 import { serializeInvestigationReportJson } from "@/lib/report/json";
 import { serializeInvestigationReportMarkdown } from "@/lib/report/markdown";
+import { assembleComparisonReport } from "@/lib/compare/assemble";
+import { serializeComparisonReportHtml } from "@/lib/compare/html";
+import { serializeComparisonReportJson } from "@/lib/compare/json";
+import { serializeComparisonReportMarkdown } from "@/lib/compare/markdown";
 
 export interface VerificationCheck {
   id: string;
@@ -636,6 +640,48 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         classifications: exported.classifications,
       },
     });
+
+    const compared = assembleComparisonReport({
+      createdAt: new Date().toISOString(),
+      claims: composerClaims.slice(0, 3),
+      symbols: [
+        { requestedSymbol: symbol, pack, brief },
+        { requestedSymbol: "rNVDA", error: "Second snapshot was not loaded in this verification pass." },
+      ],
+    });
+    const compareMarkdown = serializeComparisonReportMarkdown(compared);
+    const compareJson = serializeComparisonReportJson(compared);
+    const compareHtml = serializeComparisonReportHtml(compared);
+    const compareHonest =
+      compared.milestone === "9-multi-symbol-comparison" &&
+      compared.advisory === false &&
+      compared.symbols[0]?.snapshot?.retrievedAt === pack.investigation.retrievedAt &&
+      compared.symbols[1]?.loadStatus !== "loaded" &&
+      compared.table.some((row) => row.cells.RNVDAUSDT?.status === "unavailable") &&
+      compared.createdAt !== pack.investigation.retrievedAt &&
+      !/"BITGET_API_KEY"\s*:/.test(compareJson) &&
+      compareHtml.includes("NON-ADVISORY") &&
+      !/should buy|should sell|price will|NYSE print showed|leaderboard/i.test(
+        `${compareMarkdown}\n${compareJson}\n${compareHtml}`,
+      );
+    checks.push({
+      id: "multi-symbol-comparison",
+      title: "Compare shared claims across independently labeled snapshots",
+      endpoint: `composed models → POST /api/market/compare/report`,
+      access: "public",
+      status: compareHonest ? "pass" : "fail",
+      detail: compareHonest
+        ? `Comparison ${compared.reportId}: ${compared.symbols.length} columns, ${compared.table.length} shared claims. Failed columns stay unavailable. No Bitget refresh.`
+        : "Comparison ranked symbols, blended timestamps, or treated a missing snapshot as a negative finding.",
+      sample: {
+        createdAt: compared.createdAt,
+        columns: compared.symbols.map((item) => ({
+          symbol: item.tokenSymbol,
+          loadStatus: item.loadStatus,
+          retrievedAt: item.snapshot?.retrievedAt ?? null,
+        })),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -693,6 +739,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "multi-symbol-comparison",
+      title: "Compare shared claims across independently labeled snapshots",
+      endpoint: `composed models → POST /api/market/compare/report`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -701,7 +755,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "8-investigation-report-export",
+    milestone: "9-multi-symbol-comparison",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -720,6 +774,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Thesis revisions compare two challenges. Reordered or lightly edited claims keep identity when fingerprints or token overlap match. A status change is not a score.",
       "Structured claims use explicit kinds and fields. Selecting a type does not verify the assertion. Intraday direction is unassessed because the pack only classifies 24-hour change.",
       "Investigation report export packages the currently loaded pack, brief, challenge, and revision trail. It does not refresh Bitget. Report creation time is not a source timestamp.",
+      "Multi-symbol comparison scores the same structured claims against each loaded snapshot. Columns are not ranked and timestamps are not merged.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

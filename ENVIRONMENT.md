@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 8 investigation report export
+## Required for Milestone 9 multi-symbol comparison
 
-None. Reports assemble already-loaded investigation models. No LLM key or database is required.
+None. Comparison export scores already-loaded per-symbol packs against shared structured claims. No LLM key or database is required.
 
 ## Optional
 
