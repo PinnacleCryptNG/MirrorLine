@@ -297,4 +297,70 @@ describe("comparison serializers", () => {
       }),
     ).toThrow(/brief from the same loaded snapshot/i);
   });
+
+  it("regression: recomputes comparison assessments when shared claims are edited without changing snapshots", () => {
+    const apple = packFor("rAAPL", appleAt);
+    const nvidia = packFor("rNVDA", nvidiaAt);
+    // Initial claim: price change is down
+    const initialReport = assembleComparisonReport({
+      createdAt,
+      claims: [claim("price.change24h", { sign: "down" })],
+      symbols: [
+        { requestedSymbol: "rAAPL", pack: apple.pack, brief: apple.brief },
+        { requestedSymbol: "rNVDA", pack: nvidia.pack, brief: nvidia.brief },
+      ],
+    });
+    // rAAPL was down (-0.43%), so "down" is SUPPORTED; rNVDA was up (+1.2%), so "down" is CHALLENGED
+    const initialRow = initialReport.table[0];
+    expect(initialRow.cells.RAAPLUSDT?.statuses).toContain("supported");
+    expect(initialRow.cells.RNVDAUSDT?.statuses).toContain("challenged");
+
+    // Edited claim: price change is up (without modifying snapshots or timestamps)
+    const editedReport = assembleComparisonReport({
+      createdAt,
+      claims: [claim("price.change24h", { sign: "up" })],
+      symbols: [
+        { requestedSymbol: "rAAPL", pack: apple.pack, brief: apple.brief },
+        { requestedSymbol: "rNVDA", pack: nvidia.pack, brief: nvidia.brief },
+      ],
+    });
+    const editedRow = editedReport.table[0];
+    expect(editedRow.cells.RAAPLUSDT?.statuses).toContain("challenged");
+    expect(editedRow.cells.RNVDAUSDT?.statuses).toContain("supported");
+    // Ensure snapshot timestamps remained identical
+    expect(editedReport.symbols[0]?.snapshot?.retrievedAt).toBe(initialReport.symbols[0]?.snapshot?.retrievedAt);
+    expect(editedReport.symbols[1]?.snapshot?.retrievedAt).toBe(initialReport.symbols[1]?.snapshot?.retrievedAt);
+  });
+
+  it("regression: ensures reloading one symbol does not alter other symbol columns or timestamps", () => {
+    const apple = packFor("rAAPL", appleAt);
+    const nvidiaOld = packFor("rNVDA", nvidiaAt);
+    const nvidiaNewAt = new Date("2026-09-17T15:10:00.000Z");
+    const nvidiaNew = packFor("rNVDA", nvidiaNewAt);
+
+    const report1 = assembleComparisonReport({
+      createdAt,
+      claims: [claim("price.change24h", { sign: "down" })],
+      symbols: [
+        { requestedSymbol: "rAAPL", pack: apple.pack, brief: apple.brief },
+        { requestedSymbol: "rNVDA", pack: nvidiaOld.pack, brief: nvidiaOld.brief },
+      ],
+    });
+
+    const report2 = assembleComparisonReport({
+      createdAt: "2026-09-17T15:11:00.000Z",
+      claims: [claim("price.change24h", { sign: "down" })],
+      symbols: [
+        { requestedSymbol: "rAAPL", pack: apple.pack, brief: apple.brief },
+        { requestedSymbol: "rNVDA", pack: nvidiaNew.pack, brief: nvidiaNew.brief },
+      ],
+    });
+
+    // rAAPL column retained its original snapshot ID and timestamp
+    expect(report2.symbols[0]?.snapshot?.id).toBe(report1.symbols[0]?.snapshot?.id);
+    expect(report2.symbols[0]?.snapshot?.retrievedAt).toBe(report1.symbols[0]?.snapshot?.retrievedAt);
+    // rNVDA column updated its snapshot
+    expect(report2.symbols[1]?.snapshot?.retrievedAt).toBe("2026-09-17T15:10:00.000Z");
+    expect(report2.symbols[1]?.snapshot?.retrievedAt).not.toBe(report1.symbols[1]?.snapshot?.retrievedAt);
+  });
 });

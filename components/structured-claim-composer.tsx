@@ -59,14 +59,27 @@ export function StructuredClaimComposer({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-[#F5F7FA]">{def?.label ?? claim.kind}</p>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="font-data text-[11px] text-[#9BA3B2]" onClick={() => move(index, -1)}>
+                    <button
+                      type="button"
+                      aria-label={`Move ${def?.label ?? claim.kind} claim up`}
+                      disabled={index === 0}
+                      className="font-data text-[11px] text-[#9BA3B2] disabled:opacity-30"
+                      onClick={() => move(index, -1)}
+                    >
                       Up
                     </button>
-                    <button type="button" className="font-data text-[11px] text-[#9BA3B2]" onClick={() => move(index, 1)}>
+                    <button
+                      type="button"
+                      aria-label={`Move ${def?.label ?? claim.kind} claim down`}
+                      disabled={index === claims.length - 1}
+                      className="font-data text-[11px] text-[#9BA3B2] disabled:opacity-30"
+                      onClick={() => move(index, 1)}
+                    >
                       Down
                     </button>
                     <button
                       type="button"
+                      aria-label={`Remove ${def?.label ?? claim.kind} claim`}
                       className="font-data text-[11px] text-[#FF6B7A]"
                       onClick={() => onChange(claims.filter((_, item) => item !== index))}
                     >

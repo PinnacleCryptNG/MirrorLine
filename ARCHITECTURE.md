@@ -1,6 +1,6 @@
 # Architecture
 
-Milestone 9 sits on the investigation stack and Milestone 8 report assembly. Multi-symbol comparison does not call Bitget during export. It scores the same structured claims against each already-loaded pack and brief, then serializes JSON, Markdown, and print-friendly HTML.
+Milestone 10 hardens the complete trader-facing investigation desk and multi-symbol comparison workflow. Multi-symbol comparison does not call Bitget during export. It scores the same structured claims against each already-loaded pack and brief, then serializes JSON, Markdown, and print-friendly HTML.
 
 ```
 Browser
@@ -26,4 +26,4 @@ Snapshot loads (GET `/api/market/snapshot/{symbol}`) stay explicit user actions.
 - `lib/compare/table.ts` — claim rows × symbol columns
 - `lib/compare/assemble.ts` — recomputes challenges; does not trust client statuses
 - `app/api/market/compare/report/route.ts` — POST-only export
-- `components/multi-symbol-comparison-panel.tsx` — desk UI
+- `components/multi-symbol-comparison-panel.tsx` — hardened comparison desk UI (independent snapshot reloads, dynamic live claim recomputation, popup-safe print windows)

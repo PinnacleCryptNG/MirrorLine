@@ -355,6 +355,7 @@ export function InterpretationChallengePanel({
                       />
                       <button
                         type="button"
+                        aria-label={`Remove claim sentence ${index + 1}`}
                         className="h-10 rounded-md border border-[#252B36] px-3 text-xs text-[#FF6B7A]"
                         onClick={() => setThesis(joinClaimSentences(sentences.filter((_, item) => item !== index)))}
                       >

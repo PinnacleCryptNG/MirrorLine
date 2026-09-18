@@ -2,7 +2,7 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 9 — Multi-symbol Comparison Report** for the Bitget AI × Crypto Hackathon Genesis Season 2.
+This repository currently ships **Milestone 10 — Browser QA & Comparison Desk Hardening** for the Bitget AI × Crypto Hackathon Genesis Season 2.
 
 It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
@@ -17,6 +17,7 @@ It does not tell anyone what to buy or sell. It does not place orders. It does n
 - Compose **structured claims** with explicit kinds and fields, then challenge them without treating the type as proof
 - Export a **non-advisory investigation report** (preview, Markdown, JSON, print-friendly HTML) from the currently loaded snapshot
 - Compare the **same structured claims across multiple rTokens** with independently labeled snapshots and export a comparison report
+- Hardened multi-symbol comparison desk with single-column snapshot reload/retry, live auto-recomputing of shared claims, accessible form labels, and popup-safe print windows
 - Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
 - Trace each item to a Bitget source field, timestamp, and freshness window
 - Keep missing, stale, failed, and unverified data as explicit UNKNOWN or stale FACT items

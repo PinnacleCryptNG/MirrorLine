@@ -127,6 +127,8 @@ export function DataFoundationDesk({
         setSnapshot(snapshotJson);
       }
     } catch (err) {
+      setSnapshot(null);
+      setReport(null);
       setError(err instanceof Error ? err.message : "Unable to load Bitget data");
     } finally {
       setLoading(false);
@@ -151,8 +153,8 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 9</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Multi-symbol Comparison Report</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 10</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Multi-symbol Comparison Desk</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
             Apply the same structured claims across independently loaded rToken snapshots. This desk does not rank
             symbols, refresh Bitget during export, or invent a shared tape.
@@ -204,7 +206,11 @@ export function DataFoundationDesk({
       </section>
 
       {error ? (
-        <div className="rounded-lg border border-[#FF6B7A]/40 bg-[#FF6B7A]/10 px-4 py-3 text-sm text-[#FF6B7A]">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="rounded-lg border border-[#FF6B7A]/40 bg-[#FF6B7A]/10 px-4 py-3 text-sm text-[#FF6B7A]"
+        >
           Market data unavailable. {error}
         </div>
       ) : null}

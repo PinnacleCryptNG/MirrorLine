@@ -641,12 +641,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       },
     });
 
+    const comparePartner = symbol === "RNVDAUSDT" ? "rAAPL" : "rNVDA";
+    const partnerPair = comparePartner === "rAAPL" ? "RAAPLUSDT" : "RNVDAUSDT";
     const compared = assembleComparisonReport({
       createdAt: new Date().toISOString(),
       claims: composerClaims.slice(0, 3),
       symbols: [
         { requestedSymbol: symbol, pack, brief },
-        { requestedSymbol: "rNVDA", error: "Second snapshot was not loaded in this verification pass." },
+        { requestedSymbol: comparePartner, error: "Second snapshot was not loaded in this verification pass." },
       ],
     });
     const compareMarkdown = serializeComparisonReportMarkdown(compared);
@@ -657,7 +659,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       compared.advisory === false &&
       compared.symbols[0]?.snapshot?.retrievedAt === pack.investigation.retrievedAt &&
       compared.symbols[1]?.loadStatus !== "loaded" &&
-      compared.table.some((row) => row.cells.RNVDAUSDT?.status === "unavailable") &&
+      compared.table.some((row) => row.cells[partnerPair]?.status === "unavailable") &&
       compared.createdAt !== pack.investigation.retrievedAt &&
       !/"BITGET_API_KEY"\s*:/.test(compareJson) &&
       compareHtml.includes("NON-ADVISORY") &&
@@ -683,70 +685,60 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       },
     });
   } catch (error) {
-    checks.push({
-      id: "market-context",
-      title: "Normalize market context (observed / derived / unavailable)",
-      endpoint: `composed snapshot → GET /api/market/context/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "evidence-pack",
-      title: "Build an investigation evidence pack (FACT / INFERENCE / ASSUMPTION / UNKNOWN)",
-      endpoint: `composed context → GET /api/market/evidence/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "investigation-brief",
-      title: "Compose a non-advisory investigation brief",
-      endpoint: `composed pack → GET /api/market/brief/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "interpretation-challenge",
-      title: "Challenge a thesis against the investigation brief",
-      endpoint: `composed brief → POST /api/market/challenge/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "thesis-revision-loop",
-      title: "Diff a revised thesis against the prior challenge",
-      endpoint: `composed challenges → POST /api/market/revision/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "structured-claim-composer",
-      title: "Compose structured claims and challenge them",
-      endpoint: `composed claims → POST /api/market/composer/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "investigation-report-export",
-      title: "Export a non-advisory investigation report from the loaded snapshot",
-      endpoint: `composed models → POST /api/market/report/${symbolInput}`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
-    checks.push({
-      id: "multi-symbol-comparison",
-      title: "Compare shared claims across independently labeled snapshots",
-      endpoint: `composed models → POST /api/market/compare/report`,
-      access: "public",
-      status: "fail",
-      detail: failureDetail(error),
-    });
+    const downstreamChecks: Array<{ id: string; title: string; endpoint: string }> = [
+      {
+        id: "market-context",
+        title: "Normalize market context (observed / derived / unavailable)",
+        endpoint: `composed snapshot → GET /api/market/context/${symbolInput}`,
+      },
+      {
+        id: "evidence-pack",
+        title: "Build an investigation evidence pack (FACT / INFERENCE / ASSUMPTION / UNKNOWN)",
+        endpoint: `composed context → GET /api/market/evidence/${symbolInput}`,
+      },
+      {
+        id: "investigation-brief",
+        title: "Compose a non-advisory investigation brief",
+        endpoint: `composed pack → GET /api/market/brief/${symbolInput}`,
+      },
+      {
+        id: "interpretation-challenge",
+        title: "Challenge a thesis against the investigation brief",
+        endpoint: `composed brief → POST /api/market/challenge/${symbolInput}`,
+      },
+      {
+        id: "thesis-revision-loop",
+        title: "Diff a revised thesis against the prior challenge",
+        endpoint: `composed challenges → POST /api/market/revision/${symbolInput}`,
+      },
+      {
+        id: "structured-claim-composer",
+        title: "Compose structured claims and challenge them",
+        endpoint: `composed claims → POST /api/market/composer/${symbolInput}`,
+      },
+      {
+        id: "investigation-report-export",
+        title: "Export a non-advisory investigation report from the loaded snapshot",
+        endpoint: `composed models → POST /api/market/report/${symbolInput}`,
+      },
+      {
+        id: "multi-symbol-comparison",
+        title: "Compare shared claims across independently labeled snapshots",
+        endpoint: `composed models → POST /api/market/compare/report`,
+      },
+    ];
+    for (const downstream of downstreamChecks) {
+      if (!checks.some((c) => c.id === downstream.id)) {
+        checks.push({
+          id: downstream.id,
+          title: downstream.title,
+          endpoint: downstream.endpoint,
+          access: "public",
+          status: "fail",
+          detail: failureDetail(error),
+        });
+      }
+    }
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;

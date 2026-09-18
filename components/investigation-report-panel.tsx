@@ -106,9 +106,9 @@ export function InvestigationReportPanel({
       downloadFile(`${stem}.html`, html, "text/html;charset=utf-8");
       return;
     }
-    const popup = window.open("", "_blank", "noopener,noreferrer,width=900,height=800");
+    const popup = window.open("", "_blank", "width=900,height=800");
     if (!popup) {
-      setError("The browser blocked the print window. Download the HTML report and print it locally.");
+      setError("The browser blocked the print window. Allow popups for this site, or download the HTML report to print.");
       return;
     }
     popup.document.open();
@@ -183,7 +183,11 @@ export function InvestigationReportPanel({
             Print / save as PDF
           </button>
         </div>
-        {error ? <p className="mt-3 text-sm text-[#FF6B7A]">{error}</p> : null}
+        {error ? (
+          <p role="alert" aria-live="polite" className="mt-3 text-sm text-[#FF6B7A]">
+            {error}
+          </p>
+        ) : null}
       </div>
 
       {open && report ? (
