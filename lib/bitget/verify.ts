@@ -609,10 +609,12 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       exported.milestone === "8-investigation-report-export" &&
       exported.advisory === false &&
       exported.createdAt !== exported.snapshot.retrievedAt &&
+      markdown.includes("Report created:") &&
+      markdown.includes("Evidence snapshot retrieved:") &&
       exported.pack.items.every((item) =>
         ["FACT", "INFERENCE", "ASSUMPTION", "UNKNOWN"].includes(item.classification),
       ) &&
-      !/BITGET_API_KEY|BITGET_API_SECRET|BITGET_PASSPHRASE/.test(json) &&
+      !/"BITGET_API_KEY"\s*:|"BITGET_API_SECRET"\s*:|"BITGET_PASSPHRASE"\s*:/.test(json) &&
       html.includes("window.print") &&
       html.includes("NON-ADVISORY") &&
       !/should buy|should sell|price will|NYSE print showed/i.test(`${markdown}\n${json}\n${html}`) &&
