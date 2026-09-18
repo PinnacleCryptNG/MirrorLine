@@ -1,29 +1,39 @@
 # Architecture
 
-Milestone 10 hardens the complete trader-facing investigation desk and multi-symbol comparison workflow. Multi-symbol comparison does not call Bitget during export. It scores the same structured claims against each already-loaded pack and brief, then serializes JSON, Markdown, and print-friendly HTML.
+Milestone 11 introduces **Hackathon Demo Readiness & Reproducible Demo Mode**, adding deterministic fixture scenarios, first-time user orientation, and unmistakable demo labeling while keeping live Bitget mode completely isolated.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/compare (multi-symbol comparison)
-      → lib/report (per-symbol report assembly + sanitization)
-      → lib/composer (shared structured claims)
-      → lib/challenge
-        → lib/brief
-          → lib/evidence
-            → lib/market
-              → lib/bitget
-                → https://api.bitget.com
+    ├── /api/market/demo/* (deterministic fixtures)
+    │     → lib/fixtures (frozen scenarios: rAAPL, rNVDA, rTSLA)
+    │         → lib/market/normalize (with isDemoFixture: true)
+    │             → lib/evidence (labeled packs)
+    │                 → lib/brief (labeled briefs)
+    └── /api/market/* (live data)
+          → lib/compare (multi-symbol comparison)
+            → lib/report (per-symbol report assembly + sanitization)
+            → lib/composer (shared structured claims)
+            → lib/challenge
+              → lib/brief
+                → lib/evidence
+                  → lib/market
+                    → lib/bitget
+                      → https://api.bitget.com
 ```
 
-Snapshot loads (GET `/api/market/snapshot/{symbol}`) stay explicit user actions. Comparison export only accepts posted packs/briefs/claims.
+Snapshot loads stay explicit user actions. Demo mode does not query Bitget or fall back to live data. Live mode never silently substitutes fixtures.
 
 ## Layout
 
-- `lib/compare/types.ts` — ComparisonReport model
-- `lib/compare/symbols.ts` — normalize, duplicate, and bounds checks
-- `lib/compare/score.ts` — shared claims → existing composer engine
-- `lib/compare/table.ts` — claim rows × symbol columns
-- `lib/compare/assemble.ts` — recomputes challenges; does not trust client statuses
-- `app/api/market/compare/report/route.ts` — POST-only export
-- `components/multi-symbol-comparison-panel.tsx` — hardened comparison desk UI (independent snapshot reloads, dynamic live claim recomputation, popup-safe print windows)
+- `lib/fixtures/types.ts` — DemoScenario, DemoScenarioSummary, and DemoRecommendedClaim models
+- `lib/fixtures/scenarios.ts` — Deterministic scenario definitions with frozen timestamps and preserved stale/failure states:
+  - `rAAPL`: Thursday regular session downside (-0.43%), tight spread, fresh ticker (3s old).
+  - `rNVDA`: Thursday overnight session upside (+1.20%), wider spread, session divergence tension against closed US equity.
+  - `rTSLA`: Saturday weekend session, stale ticker (48s old vs 15s limit), and partial book failure resilience.
+- `lib/fixtures/index.ts` — Scenario catalog matching, snapshot generation, and supported demo symbols.
+- `app/api/market/demo/scenarios/route.ts` — GET catalog route.
+- `app/api/market/demo/snapshot/[symbol]/route.ts` — GET deterministic frozen snapshot route (404 with no fallback for unmapped symbols).
+- `components/first-time-orientation.tsx` — Product-specific orientation card explaining what Mirrorline does and deliberately does not do, evidence classifications (**FACT**, **INFERENCE**, **ASSUMPTION**, **UNKNOWN**), and assessment statuses (supported by evidence only, not proof of a profitable trading outcome).
+- `lib/report/` & `lib/compare/` — HTML, Markdown, and JSON serializers with prominent `DEMO / FIXTURE DATA` banners and disclaimers when `isDemoFixture: true`.
+- `components/multi-symbol-comparison-panel.tsx` — Multi-symbol comparison desk with fixture mode toggle, 1-click demo pair loader (`rAAPL vs rNVDA`), per-column fixture tags, and live claim recomputation.

@@ -2,12 +2,16 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 10 — Browser QA & Comparison Desk Hardening** for the Bitget AI × Crypto Hackathon Genesis Season 2.
+This repository currently ships **Milestone 11 — Hackathon Demo Readiness & Reproducible Demo Mode** for the Bitget AI × Crypto Hackathon Genesis Season 2.
 
 It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
 ## What works now
 
+- **First-time user orientation**: Clear, accessible in-product guidance explaining what Mirrorline does and deliberately does not do, core evidence classifications (**FACT**, **INFERENCE**, **ASSUMPTION**, **UNKNOWN**), and assessment statuses (supported by evidence only, not proof of a profitable trading outcome).
+- **Reproducible demo fixture mode**: Three deterministic, frozen test scenarios (`rAAPL` regular session down, `rNVDA` overnight upside & session tension, `rTSLA` weekend session with stale ticker and partial failure resilience) with preserved source timestamps.
+- **Unmistakable demo labeling**: Every demo surface, preview card, and export (JSON, Markdown, HTML, print) is prominently stamped with `DEMO / FIXTURE DATA` and scenario metadata.
+- **Strict live vs. demo isolation**: Demo mode never queries live Bitget endpoints or silently falls back to live data. Live mode never silently substitutes fixtures.
 - Discover Reality rToken instruments and retrieve Bitget ticker, candles, session, and stock metadata
 - Normalize a market context that labels every field observed, derived, or unavailable
 - Build a per-investigation **evidence pack** that classifies claims as **FACT**, **INFERENCE**, **ASSUMPTION**, or **UNKNOWN**
@@ -17,6 +21,7 @@ It does not tell anyone what to buy or sell. It does not place orders. It does n
 - Compose **structured claims** with explicit kinds and fields, then challenge them without treating the type as proof
 - Export a **non-advisory investigation report** (preview, Markdown, JSON, print-friendly HTML) from the currently loaded snapshot
 - Compare the **same structured claims across multiple rTokens** with independently labeled snapshots and export a comparison report
+- 1-click **demo comparison evaluation** (`rAAPL` vs `rNVDA`) with independent snapshots, per-column fixture tags, and distinct claim assessments
 - Hardened multi-symbol comparison desk with single-column snapshot reload/retry, live auto-recomputing of shared claims, accessible form labels, and popup-safe print windows
 - Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
 - Trace each item to a Bitget source field, timestamp, and freshness window
@@ -75,6 +80,8 @@ Other server routes:
 - `POST /api/market/composer/rAAPL` — structured claim challenge (`{ claims, freeText?, reason?, assumptions? }`)
 - `POST /api/market/report/rAAPL` — investigation report from loaded models (`{ pack, brief, challenge?, revisions?, context? }`, `?format=json|markdown|html`)
 - `POST /api/market/compare/report` — multi-symbol comparison report from loaded models (`{ symbols, claims, freeText? }`, `?format=json|markdown|html`)
+- `GET /api/market/demo/scenarios` — list available deterministic demo scenarios
+- `GET /api/market/demo/snapshot/[symbol]` — deterministic frozen snapshot (rAAPL, rNVDA, rTSLA; 404 for others, no live fallback)
 - `GET /api/market/orderbook/rAAPL`
 
 ## Architecture
