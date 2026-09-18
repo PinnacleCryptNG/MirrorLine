@@ -128,7 +128,15 @@ export function InvestigationReportPanel({
           Bitget data. Report creation time is separate from source timestamps.
         </p>
         {!pack || !brief ? (
-          <p className="mt-3 text-sm text-[#9BA3B2]">Verify live data to load a snapshot before exporting a report.</p>
+          <p className="mt-3 text-sm text-[#9BA3B2]">Verify live data or load a demo fixture to inspect and export a report.</p>
+        ) : null}
+        {report?.isDemoFixture ? (
+          <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-sm text-[#F4C95D]">
+            <p className="font-semibold uppercase tracking-wide text-xs">DEMO / FIXTURE DATA</p>
+            <p className="mt-0.5 text-xs text-[#F4C95D]/90">
+              This report will be exported from frozen demonstration fixtures ({report.fixtureLabel ?? report.fixtureId ?? "fixture"}). It does not represent live Bitget market conditions.
+            </p>
+          </div>
         ) : null}
         {report?.snapshot.stale || report?.snapshot.warning ? (
           <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-sm text-[#F4C95D]">
@@ -192,11 +200,23 @@ export function InvestigationReportPanel({
 
       {open && report ? (
         <div className="report-print-root rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-          <p className="font-data text-[10px] uppercase tracking-wide text-[#8B7CFF]">Non-advisory report preview</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-data text-[10px] uppercase tracking-wide text-[#8B7CFF]">Non-advisory report preview</p>
+            {report.isDemoFixture ? (
+              <span className="rounded-full border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-2 py-0.5 font-data text-[10px] text-[#F4C95D]">
+                DEMO / FIXTURE DATA
+              </span>
+            ) : null}
+          </div>
           <h3 className="mt-2 text-xl font-medium text-[#F5F7FA]">{report.tokenSymbol} investigation report</h3>
+          {report.isDemoFixture ? (
+            <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-xs text-[#F4C95D]">
+              <strong>DEMO / FIXTURE DATA:</strong> Scenario {report.fixtureLabel ?? report.fixtureId}. Timestamps are preserved from the recorded scenario and not refreshed from live markets.
+            </div>
+          ) : null}
           <ul className="mt-3 space-y-1 text-sm text-[#9BA3B2]">
             <li>Report created: {report.createdAt}</li>
-            <li>Evidence snapshot retrieved: {report.snapshot.retrievedAt}</li>
+            <li>Evidence snapshot retrieved: {report.snapshot.retrievedAt}{report.isDemoFixture ? " (fixture timestamp)" : ""}</li>
             <li>Snapshot id: {report.snapshot.id}</li>
             <li>Question: {report.question}</li>
           </ul>

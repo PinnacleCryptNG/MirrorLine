@@ -8,6 +8,8 @@ import type { EvidencePack } from "@/lib/evidence/types";
 import type { InvestigationBrief } from "@/lib/brief/types";
 import type { MarketContext, MarketSnapshotPayload } from "@/lib/market/types";
 import type { StructuredClaim } from "@/lib/challenge/types";
+import { createStructuredClaim } from "@/lib/composer";
+import { SUPPORTED_DEMO_SYMBOLS } from "@/lib/fixtures";
 import {
   MAX_COMPARISON_SYMBOLS,
   SUGGESTED_COMPARE_SYMBOLS,
@@ -68,6 +70,12 @@ export function MultiSymbolComparisonPanel() {
   const [comparison, setComparison] = useState<ComparisonReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<"load" | "run" | null>(null);
+  const [useDemoMode, setUseDemoMode] = useState(false);
+
+  const endpointFor = (tokenSymbol: string) =>
+    useDemoMode
+      ? `/api/market/demo/snapshot/${encodeURIComponent(tokenSymbol)}`
+      : `/api/market/snapshot/${encodeURIComponent(tokenSymbol)}`;
 
   const addSymbol = (raw: string) => {
     setError(null);
@@ -109,7 +117,7 @@ export function MultiSymbolComparisonPanel() {
       current.map((s) => (s.pair === pair ? { ...s, status: "loading", error: null } : s))
     );
     try {
-      const response = await fetch(`/api/market/snapshot/${encodeURIComponent(slot.tokenSymbol)}`, {
+      const response = await fetch(endpointFor(slot.tokenSymbol), {
         cache: "no-store",
       });
       const json = (await response.json()) as MarketSnapshotPayload & { message?: string };
@@ -211,7 +219,7 @@ export function MultiSymbolComparisonPanel() {
       slots.map(async (slot) => {
         const loading: SymbolSlot = { ...slot, status: "loading", error: null };
         try {
-          const response = await fetch(`/api/market/snapshot/${encodeURIComponent(slot.tokenSymbol)}`, {
+          const response = await fetch(endpointFor(slot.tokenSymbol), {
             cache: "no-store",
           });
           const json = (await response.json()) as MarketSnapshotPayload & { message?: string };
@@ -260,6 +268,91 @@ export function MultiSymbolComparisonPanel() {
     );
     setSlots(next);
     setBusy(null);
+  };
+
+  const loadDemoComparison = async () => {
+    setUseDemoMode(true);
+    setBusy("load");
+    setError(null);
+    setComparison(null);
+
+    const demoPairSymbols = ["rAAPL", "rNVDA"];
+    const initialSlots: SymbolSlot[] = demoPairSymbols.map((sym) => {
+      const parsed = parseComparisonSymbol(sym);
+      return {
+        requested: parsed.requested,
+        pair: parsed.pair,
+        tokenSymbol: parsed.tokenSymbol,
+        status: "loading",
+        error: null,
+        pack: null,
+        brief: null,
+        context: null,
+      };
+    });
+    setSlots(initialSlots);
+
+    try {
+      const loaded = await Promise.all(
+        initialSlots.map(async (slot) => {
+          const res = await fetch(`/api/market/demo/snapshot/${encodeURIComponent(slot.tokenSymbol)}`, {
+            cache: "no-store",
+          });
+          const json = (await res.json()) as MarketSnapshotPayload & { message?: string };
+          if (!res.ok) {
+            return {
+              ...slot,
+              status: "error" as const,
+              error: json.message ?? "Demo snapshot failed",
+            };
+          }
+          const ctx = snapshotContext(json);
+          if (!ctx) {
+            return {
+              ...slot,
+              status: "error" as const,
+              error: "Missing market context in demo snapshot",
+            };
+          }
+          const pack = buildEvidencePack(ctx);
+          const brief = buildInvestigationBrief(pack);
+          return {
+            ...slot,
+            status: "loaded" as const,
+            error: null,
+            pack,
+            brief,
+            context: ctx,
+          };
+        }),
+      );
+      setSlots(loaded);
+
+      const demoClaims: StructuredClaim[] = [
+        createStructuredClaim("price.change24h", 0),
+        createStructuredClaim("session.us", 1),
+        createStructuredClaim("reference.tape", 2),
+      ];
+      demoClaims[0].fields = { sign: "down" };
+      demoClaims[1].fields = { state: "regular" };
+      demoClaims[2].fields = { comparison: "divergence" };
+      setClaims(demoClaims);
+
+      const report = assembleComparisonReport({
+        symbols: loaded.map((s) => ({
+          requestedSymbol: s.tokenSymbol,
+          pack: s.pack,
+          brief: s.brief,
+          error: s.error ?? (s.status === "loaded" ? null : "Snapshot not loaded"),
+        })),
+        claims: demoClaims,
+      });
+      setComparison(report);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load demo comparison.");
+    } finally {
+      setBusy(null);
+    }
   };
 
   const handleClaimsChange = (nextClaims: StructuredClaim[]) => {
@@ -375,12 +468,45 @@ export function MultiSymbolComparisonPanel() {
   return (
     <section className="flex flex-col gap-4">
       <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-        <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MULTI-SYMBOL COMPARISON · NON-ADVISORY</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MULTI-SYMBOL COMPARISON · NON-ADVISORY</p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUseDemoMode((prev) => !prev);
+                setError(null);
+              }}
+              className={`rounded-full border px-3 py-0.5 font-data text-xs transition-colors ${
+                useDemoMode
+                  ? "border-[#F4C95D] bg-[#F4C95D]/10 text-[#F4C95D]"
+                  : "border-[#252B36] bg-[#171B24] text-[#9BA3B2] hover:border-[#8B7CFF]"
+              }`}
+            >
+              {useDemoMode ? "◆ Demo Fixture Mode" : "● Live Bitget Mode"}
+            </button>
+            <button
+              type="button"
+              onClick={loadDemoComparison}
+              disabled={busy !== null}
+              className="rounded-full border border-[#8B7CFF]/50 bg-[#8B7CFF]/10 px-3 py-0.5 font-data text-xs text-[#8B7CFF] hover:bg-[#8B7CFF]/20 disabled:opacity-40"
+            >
+              Load Demo Comparison (rAAPL vs rNVDA)
+            </button>
+          </div>
+        </div>
+
         <h2 className="mt-2 text-lg font-medium">Compare the same claims across rTokens</h2>
         <p className="mt-1 text-sm text-[#9BA3B2]">
           Each symbol keeps its own evidence snapshot and timestamp. This view does not rank tokens, blend prints, or
           recommend trades. Export uses the currently loaded columns only.
         </p>
+
+        {useDemoMode ? (
+          <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-xs text-[#F4C95D]">
+            <strong>DEMO / FIXTURE MODE ACTIVE</strong>: Snapshots will load from deterministic test fixtures ({SUPPORTED_DEMO_SYMBOLS.join(", ")}).
+          </div>
+        ) : null}
 
         <div className="mt-4 flex flex-wrap gap-2">
           {SUGGESTED_COMPARE_SYMBOLS.map((item) => {
@@ -442,12 +568,19 @@ export function MultiSymbolComparisonPanel() {
                 className="flex flex-col gap-2 rounded-md border border-[#252B36] bg-[#080A0F] px-3 py-2 md:flex-row md:items-center md:justify-between"
               >
                 <div>
-                  <p className="text-sm text-[#F5F7FA]">
-                    {slot.tokenSymbol} <span className="font-data text-[11px] text-[#626B7A]">{slot.pair}</span>
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-[#F5F7FA]">
+                      {slot.tokenSymbol} <span className="font-data text-[11px] text-[#626B7A]">{slot.pair}</span>
+                    </p>
+                    {slot.context?.isDemoFixture ? (
+                      <span className="rounded border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-1.5 py-0.2 font-data text-[10px] text-[#F4C95D]">
+                        FIXTURE DATA
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="font-data text-[11px] text-[#9BA3B2]">
                     {slot.status === "loaded"
-                      ? `loaded · retrieved ${slot.pack?.investigation.retrievedAt}`
+                      ? `loaded · retrieved ${slot.pack?.investigation.retrievedAt}${slot.context?.isDemoFixture ? " (fixture timestamp)" : ""}`
                       : slot.status === "loading"
                         ? "loading snapshot…"
                         : slot.status === "error"
@@ -559,8 +692,20 @@ export function MultiSymbolComparisonPanel() {
 
       {comparison ? (
         <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-          <h3 className="text-sm font-medium">Comparison table</h3>
-          <p className="mt-1 text-xs text-[#9BA3B2]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-medium">Comparison table</h3>
+            {comparison.isDemoFixture ? (
+              <span className="rounded-full border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-2 py-0.5 font-data text-[10px] text-[#F4C95D]">
+                DEMO / FIXTURE DATA
+              </span>
+            ) : null}
+          </div>
+          {comparison.isDemoFixture ? (
+            <div className="mt-2.5 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-xs text-[#F4C95D]">
+              <strong>DEMO / FIXTURE DATA:</strong> One or more columns were evaluated against frozen fixture snapshots. Timestamps reflect each fixture&apos;s recorded scenario, not live market conditions.
+            </div>
+          ) : null}
+          <p className="mt-2 text-xs text-[#9BA3B2]">
             Created {comparison.createdAt}. This is not a ranking. Unavailable cells are missing evidence, not a
             negative finding.
           </p>
@@ -571,7 +716,14 @@ export function MultiSymbolComparisonPanel() {
                   <th className="border border-[#252B36] bg-[#080A0F] px-3 py-2 font-medium">Shared claim</th>
                   {comparison.symbols.map((column) => (
                     <th key={column.key} className="border border-[#252B36] bg-[#080A0F] px-3 py-2 font-medium">
-                      <p>{column.tokenSymbol ?? column.requestedSymbol}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p>{column.tokenSymbol ?? column.requestedSymbol}</p>
+                        {column.isDemoFixture ? (
+                          <span className="rounded border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-1 py-0.2 font-data text-[9px] text-[#F4C95D]">
+                            FIXTURE
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="font-data text-[10px] font-normal text-[#626B7A]">
                         {column.snapshot?.retrievedAt ?? column.error ?? "not loaded"}
                         {column.snapshot?.stale ? " · stale" : ""}

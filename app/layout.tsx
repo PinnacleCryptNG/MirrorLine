@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Multi-symbol Comparison Desk",
+  title: "Mirrorline · Hackathon Demo & Investigation Desk",
   description:
-    "Milestone 10 of Mirrorline: hardened multi-symbol comparison desk and evidence-first investigation reports for Bitget Reality rTokens. Non-advisory.",
+    "Milestone 11 of Mirrorline: reproducible demo mode, first-time user orientation, and hardened multi-symbol evidence comparison desk for Bitget Reality rTokens. Non-advisory.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
