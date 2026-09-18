@@ -5,6 +5,7 @@ import { buildInvestigationBrief } from "@/lib/brief/generate";
 import { assembleInvestigationReport } from "@/lib/report/assemble";
 import { assembleComparisonReport } from "@/lib/compare/assemble";
 import { createStructuredClaim } from "@/lib/composer";
+import { buildComposerChallenge } from "@/lib/composer/challenge";
 
 describe("Production UI/UX Regression: Initial State, Progressive Disclosure & Mode Separation", () => {
   it("verifies initial page entry contract: ready state without unsolicited live snapshot payload", async () => {
@@ -63,5 +64,31 @@ describe("Production UI/UX Regression: Initial State, Progressive Disclosure & M
     expect(comp.symbols[0].snapshot?.retrievedAt).toBe("2026-09-17T15:00:00.000Z");
     expect(comp.symbols[1].snapshot?.retrievedAt).toBe("2026-09-17T20:30:00.000Z");
     expect(comp.isDemoFixture).toBe(true);
+  });
+
+  it("verifies non-advisory constraints and status assessment semantics", () => {
+    const snap = getDemoSnapshot("rAAPL")!;
+    const pack = buildEvidencePack(snap.context);
+    const brief = buildInvestigationBrief(pack);
+
+    // Test a supported claim
+    const claimDown = createStructuredClaim("price.direction", 0);
+    claimDown.fields = { direction: "down", timeframe: "24h" };
+
+    const challenge = buildComposerChallenge({
+      pack,
+      brief,
+      claims: [claimDown],
+    });
+
+    expect(challenge.advisory).toBe(false);
+    expect(challenge.summary.supported).toBe(1);
+    expect(challenge.assessments[0].status).toBe("supported");
+
+    // UNKNOWN remains distinct and does not imply false or failure
+    expect(pack.summary.unknown).toBeGreaterThan(0);
+    const unknownItem = pack.items.find((i) => i.classification === "UNKNOWN");
+    expect(unknownItem).toBeDefined();
+    expect(unknownItem?.status).toBe("unverified");
   });
 });

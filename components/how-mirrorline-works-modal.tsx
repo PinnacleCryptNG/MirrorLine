@@ -25,23 +25,23 @@ export function HowMirrorlineWorksModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="how-mirrorline-works-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl border border-[#252B36] bg-[#10131A] shadow-2xl overflow-hidden">
+      <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-2xl overflow-hidden text-[var(--text-primary)]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#252B36] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-xs font-semibold text-[#8B7CFF]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-light)] font-mono text-xs font-bold text-[var(--accent)] dark:text-[#86C495]">
               ?
             </span>
             <div>
-              <h2 id="how-mirrorline-works-title" className="text-base font-semibold text-[#F5F7FA]">
+              <h2 id="how-mirrorline-works-title" className="text-base font-semibold text-[var(--text-primary)]">
                 How Mirrorline Works
               </h2>
-              <p className="text-xs text-[#9BA3B2]">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Evidence-first, non-advisory investigation framework for Reality rTokens
               </p>
             </div>
@@ -50,7 +50,7 @@ export function HowMirrorlineWorksModal({
             type="button"
             onClick={onClose}
             aria-label="Close help guide"
-            className="rounded-md p-1.5 text-[#9BA3B2] hover:bg-[#171B24] hover:text-[#F5F7FA]"
+            className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors"
           >
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -63,14 +63,14 @@ export function HowMirrorlineWorksModal({
         </div>
 
         {/* Tab switch */}
-        <div className="flex border-b border-[#252B36] bg-[#080A0F] px-6">
+        <div className="flex border-b border-[var(--border)] bg-[var(--bg-subtle)] px-6">
           <button
             type="button"
             onClick={() => setActiveTab("principles")}
-            className={`border-b-2 py-3 px-4 font-data text-xs font-medium transition-colors ${
+            className={`border-b-2 py-3 px-4 font-mono text-xs font-medium transition-colors ${
               activeTab === "principles"
-                ? "border-[#8B7CFF] text-[#8B7CFF]"
-                : "border-transparent text-[#9BA3B2] hover:text-[#F5F7FA]"
+                ? "border-[var(--accent)] text-[var(--accent)] dark:text-[#86C495]"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Principles & Workflow
@@ -78,10 +78,10 @@ export function HowMirrorlineWorksModal({
           <button
             type="button"
             onClick={() => setActiveTab("walkthrough")}
-            className={`border-b-2 py-3 px-4 font-data text-xs font-medium transition-colors ${
+            className={`border-b-2 py-3 px-4 font-mono text-xs font-medium transition-colors ${
               activeTab === "walkthrough"
-                ? "border-[#8B7CFF] text-[#8B7CFF]"
-                : "border-transparent text-[#9BA3B2] hover:text-[#F5F7FA]"
+                ? "border-[var(--accent)] text-[var(--accent)] dark:text-[#86C495]"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             3–5 Min Evaluator Walkthrough
@@ -89,78 +89,70 @@ export function HowMirrorlineWorksModal({
         </div>
 
         {/* Body content with scroll */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-[#9BA3B2]">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-[var(--text-secondary)]">
           {activeTab === "principles" ? (
             <>
               {/* Does vs Does Not Do */}
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-lg border border-[#36D399]/20 bg-[#36D399]/5 p-3.5">
-                  <h3 className="font-semibold text-[#36D399] uppercase tracking-wide text-[11px]">
+                <div className="rounded-lg border border-[var(--positive-border)] bg-[var(--positive-bg)] p-4">
+                  <h3 className="font-semibold text-[var(--positive)] uppercase tracking-wide text-[11px] font-mono">
                     What Mirrorline Does
                   </h3>
-                  <ul className="mt-2 space-y-1.5">
+                  <ul className="mt-2.5 space-y-2">
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#36D399] font-bold">✓</span>
+                      <span className="text-[var(--positive)] font-bold">✓</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">Stress-tests interpretations:</strong> Evaluates trader claims
-                        strictly against loaded Bitget market context.
+                        <strong className="text-[var(--text-primary)]">Tests your ideas:</strong> Evaluates your claims strictly against verified Bitget market data.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#36D399] font-bold">✓</span>
+                      <span className="text-[var(--positive)] font-bold">✓</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">Classifies evidence:</strong> Separates observed FACTs from
-                        formulaic INFERENCEs, convention ASSUMPTIONs, and explicit UNKNOWNs.
+                        <strong className="text-[var(--text-primary)]">Classifies evidence:</strong> Separates observed FACTs from formulaic INFERENCEs, convention ASSUMPTIONs, and explicit UNKNOWNs.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#36D399] font-bold">✓</span>
+                      <span className="text-[var(--positive)] font-bold">✓</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">Exposes structural tensions:</strong> Identifies session
-                        divergence (e.g. overnight token trading vs closed US equity), stale quotes, and book limitations.
+                        <strong className="text-[var(--text-primary)]">Exposes mismatches & gaps:</strong> Identifies session divergence (e.g. 24/7 token trading vs closed US equity), stale quotes, and book limitations.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#36D399] font-bold">✓</span>
+                      <span className="text-[var(--positive)] font-bold">✓</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">Preserves provenance audit trail:</strong> Traces every claim
-                        to Bitget source fields, endpoints, and observation timestamps.
+                        <strong className="text-[var(--text-primary)]">Full source provenance:</strong> Traces every claim directly to Bitget endpoints, fields, and observation timestamps.
                       </span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="rounded-lg border border-[#FF6B7A]/20 bg-[#FF6B7A]/5 p-3.5">
-                  <h3 className="font-semibold text-[#FF6B7A] uppercase tracking-wide text-[11px]">
+                <div className="rounded-lg border border-[var(--negative-border)] bg-[var(--negative-bg)] p-4">
+                  <h3 className="font-semibold text-[var(--negative)] uppercase tracking-wide text-[11px] font-mono">
                     What Mirrorline Deliberately Does NOT Do
                   </h3>
-                  <ul className="mt-2 space-y-1.5">
+                  <ul className="mt-2.5 space-y-2">
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#FF6B7A] font-bold">✕</span>
+                      <span className="text-[var(--negative)] font-bold">✕</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">No buy/sell advice:</strong> Does not recommend trades, entry
-                        points, price targets, or sizing.
+                        <strong className="text-[var(--text-primary)]">No buy/sell advice:</strong> Never tells you what to buy, sell, or hold.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#FF6B7A] font-bold">✕</span>
+                      <span className="text-[var(--negative)] font-bold">✕</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">No price predictions:</strong> Does not forecast direction or
-                        claim a thesis will prove profitable.
+                        <strong className="text-[var(--text-primary)]">No price predictions:</strong> Makes no promises of profit or forecasts of market direction.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#FF6B7A] font-bold">✕</span>
+                      <span className="text-[var(--negative)] font-bold">✕</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">No trade execution:</strong> Has no order placement, private
-                        wallet keys, or autonomous trading agents.
+                        <strong className="text-[var(--text-primary)]">No trade execution:</strong> Does not connect to wallets, place orders, or execute trades.
                       </span>
                     </li>
                     <li className="flex items-start gap-1.5">
-                      <span className="text-[#FF6B7A] font-bold">✕</span>
+                      <span className="text-[var(--negative)] font-bold">✕</span>
                       <span>
-                        <strong className="text-[#F5F7FA]">No fabricated data:</strong> Does not invent US underlying
-                        tape prints, news catalysts, or 40-level depth.
+                        <strong className="text-[var(--text-primary)]">No fabricated data:</strong> Never invents US underlying stock tape prints, news catalysts, or Reality depth.
                       </span>
                     </li>
                   </ul>
@@ -169,213 +161,197 @@ export function HowMirrorlineWorksModal({
 
               {/* Classifications & Assessment Statuses */}
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-lg border border-[#252B36] bg-[#080A0F] p-3.5">
-                  <h3 className="font-semibold text-[#8B7CFF] uppercase tracking-wide text-[11px]">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+                  <h3 className="font-semibold text-[var(--accent)] dark:text-[#86C495] uppercase tracking-wide text-[11px] font-mono">
                     Evidence Classifications
                   </h3>
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2.5 space-y-2">
                     <p>
-                      <span className="rounded border border-[#5EA7FF]/40 bg-[#5EA7FF]/10 px-1.5 py-0.5 font-data text-[10px] text-[#5EA7FF]">
+                      <span className="rounded border border-[var(--info-border)] bg-[var(--info-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--info)] font-bold">
                         FACT
                       </span>{" "}
-                      Directly returned Bitget payload field (last price, 24h ticker, candle OHLC, session windows).
+                      Directly shown by available data (last price, 24h ticker, candle OHLC, session windows).
                     </p>
                     <p>
-                      <span className="rounded border border-[#8B7CFF]/40 bg-[#8B7CFF]/10 px-1.5 py-0.5 font-data text-[10px] text-[#8B7CFF]">
+                      <span className="rounded border border-[var(--accent-border)] bg-[var(--accent-light)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--accent-text)] font-bold">
                         INFERENCE
                       </span>{" "}
-                      Formulaic calculation strictly over facts (spread in bps, derived session state, bar close vs open).
+                      A conclusion drawn from the data, not directly stated by it (spread in bps, derived session state).
                     </p>
                     <p>
-                      <span className="rounded border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-1.5 py-0.5 font-data text-[10px] text-[#F4C95D]">
+                      <span className="rounded border border-[var(--warning-border)] bg-[var(--warning-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--warning)] font-bold">
                         ASSUMPTION
                       </span>{" "}
-                      Convention-based mapping (e.g. rAAPL → AAPL) without Bitget confirmation. Not verified proof.
+                      Something taken as true but not yet verified (e.g. rAAPL → Apple Inc. mapping).
                     </p>
                     <p>
-                      <span className="rounded border border-[#626B7A]/40 bg-[#171B24] px-1.5 py-0.5 font-data text-[10px] text-[#9BA3B2]">
+                      <span className="rounded border border-[var(--border)] bg-[var(--bg-card)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-secondary)] font-bold">
                         UNKNOWN
                       </span>{" "}
-                      Unanswered question (e.g. live US tape, news catalyst). UNKNOWN means evidence is absent, not that
-                      the claim is false.
+                      The available evidence does not establish an answer. Unanswered, not false.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-[#252B36] bg-[#080A0F] p-3.5">
-                  <h3 className="font-semibold text-[#8B7CFF] uppercase tracking-wide text-[11px]">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+                  <h3 className="font-semibold text-[var(--accent)] dark:text-[#86C495] uppercase tracking-wide text-[11px] font-mono">
                     Claim Assessment Statuses
                   </h3>
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2.5 space-y-2">
                     <p>
-                      <span className="rounded border border-[#36D399]/40 bg-[#36D399]/10 px-1.5 py-0.5 font-data text-[10px] text-[#36D399]">
+                      <span className="rounded border border-[var(--positive-border)] bg-[var(--positive-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--positive)] font-bold">
                         supported
                       </span>{" "}
-                      Loaded snapshot evidence directly aligns with the claim.{" "}
-                      <strong className="text-[#F5F7FA]">
-                        Supported by evidence only — not proof of a profitable outcome.
-                      </strong>
+                      Matches available evidence in the current snapshot.
                     </p>
                     <p>
-                      <span className="rounded border border-[#FF6B7A]/40 bg-[#FF6B7A]/10 px-1.5 py-0.5 font-data text-[10px] text-[#FF6B7A]">
+                      <span className="rounded border border-[var(--negative-border)] bg-[var(--negative-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--negative)] font-bold">
                         challenged
                       </span>{" "}
-                      Loaded snapshot evidence contradicts the claim (e.g. claiming upside when 24h change is negative).
+                      Contradicted or limited by market data in the pack.
                     </p>
                     <p>
-                      <span className="rounded border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-1.5 py-0.5 font-data text-[10px] text-[#F4C95D]">
+                      <span className="rounded border border-[var(--warning-border)] bg-[var(--warning-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--warning)] font-bold">
                         unsupported
                       </span>{" "}
-                      Loaded snapshot lacks evidence to verify or disprove the claim. Remains unverified.
+                      Lacks evidence in the current snapshot to verify or disprove.
                     </p>
                     <p>
-                      <span className="rounded border border-[#8B7CFF]/40 bg-[#8B7CFF]/10 px-1.5 py-0.5 font-data text-[10px] text-[#8B7CFF]">
+                      <span className="rounded border border-[var(--border)] bg-[var(--bg-card)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-secondary)] font-bold">
                         unassessed
                       </span>{" "}
-                      Claim parameters cannot be scored by the deterministic engine (e.g. intraday timeframe vs 24h change).
+                      Could not be mapped reliably from the input.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* 5-Step Workflow */}
-              <div className="rounded-lg border border-[#252B36] bg-[#080A0F] p-3.5">
-                <h3 className="font-semibold text-[#8B7CFF] uppercase tracking-wide text-[11px]">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+                <h3 className="font-semibold text-[var(--accent)] dark:text-[#86C495] uppercase tracking-wide text-[11px] font-mono">
                   Intended 5-Step Investigation Workflow
                 </h3>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5 font-data text-[11px]">
-                  <div className="rounded border border-[#252B36] bg-[#10131A] p-2">
-                    <span className="text-[#8B7CFF] font-bold">1. Load Snapshot</span>
-                    <p className="mt-1 text-[#9BA3B2]">Verify live Bitget data or select a deterministic fixture.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5 font-mono text-[11px]">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-2.5">
+                    <span className="text-[var(--accent)] dark:text-[#86C495] font-bold">1. Load Snapshot</span>
+                    <p className="mt-1 text-[var(--text-secondary)]">Verify live Bitget data or select a deterministic fixture.</p>
                   </div>
-                  <div className="rounded border border-[#252B36] bg-[#10131A] p-2">
-                    <span className="text-[#8B7CFF] font-bold">2. Inspect Evidence</span>
-                    <p className="mt-1 text-[#9BA3B2]">Examine FACTs, freshness windows, and explicit UNKNOWNs.</p>
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-2.5">
+                    <span className="text-[var(--accent)] dark:text-[#86C495] font-bold">2. Inspect Evidence</span>
+                    <p className="mt-1 text-[var(--text-secondary)]">Examine FACTs, freshness windows, and explicit UNKNOWNs.</p>
                   </div>
-                  <div className="rounded border border-[#252B36] bg-[#10131A] p-2">
-                    <span className="text-[#8B7CFF] font-bold">3. Compose Claims</span>
-                    <p className="mt-1 text-[#9BA3B2]">Add structured claims (direction, session, spread, tape).</p>
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-2.5">
+                    <span className="text-[var(--accent)] dark:text-[#86C495] font-bold">3. Compose Claims</span>
+                    <p className="mt-1 text-[var(--text-secondary)]">Add structured claims (direction, session, spread, tape).</p>
                   </div>
-                  <div className="rounded border border-[#252B36] bg-[#10131A] p-2">
-                    <span className="text-[#8B7CFF] font-bold">4. Challenge & Revise</span>
-                    <p className="mt-1 text-[#9BA3B2]">Score claims, review attack points, and track thesis revision diffs.</p>
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-2.5">
+                    <span className="text-[var(--accent)] dark:text-[#86C495] font-bold">4. Challenge & Revise</span>
+                    <p className="mt-1 text-[var(--text-secondary)]">Score claims, review attack points, and track revision diffs.</p>
                   </div>
-                  <div className="rounded border border-[#252B36] bg-[#10131A] p-2">
-                    <span className="text-[#8B7CFF] font-bold">5. Compare or Export</span>
-                    <p className="mt-1 text-[#9BA3B2]">Score across symbols or export non-advisory JSON/MD/HTML.</p>
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-2.5">
+                    <span className="text-[var(--accent)] dark:text-[#86C495] font-bold">5. Compare or Export</span>
+                    <p className="mt-1 text-[var(--text-secondary)]">Score across symbols or export non-advisory JSON/MD/HTML.</p>
                   </div>
                 </div>
               </div>
             </>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-lg border border-[#8B7CFF]/30 bg-[#8B7CFF]/5 p-3.5">
+              <div className="rounded-lg border border-[var(--accent-border)] bg-[var(--accent-light)] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold text-[#8B7CFF] uppercase tracking-wide text-[11px]">
+                    <h3 className="font-semibold text-[var(--accent)] dark:text-[#86C495] uppercase tracking-wide text-[11px] font-mono">
                       3–5 Minute Evaluator Walkthrough
                     </h3>
-                    <p className="mt-0.5 text-xs text-[#9BA3B2]">
-                      Fast, reproducible evaluation path using deterministic demo fixtures. Requires zero API keys and does
-                      not rely on live market movements.
+                    <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                      Fast, reproducible evaluation path using deterministic demo fixtures. Requires zero API keys and does not rely on live market movements.
                     </p>
                   </div>
-                  <span className="rounded border border-[#8B7CFF]/40 bg-[#8B7CFF]/10 px-2 py-0.5 font-data text-[10px] text-[#8B7CFF]">
+                  <span className="rounded border border-[var(--accent-border)] bg-[var(--bg-card)] px-2 py-0.5 font-mono text-[10px] text-[var(--accent)] font-bold">
                     DETERMINISTIC PATH
                   </span>
                 </div>
-                <ol className="mt-4 space-y-3 text-xs text-[#9BA3B2]">
+                <ol className="mt-4 space-y-3 text-xs text-[var(--text-secondary)]">
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       A
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Load a demo scenario:</strong> Select{" "}
-                      <code className="text-[#F4C95D]">rAAPL · Regular Session Down</code> using the Demo buttons on the desk.
-                      Notice the prominent amber <code className="text-[#F4C95D]">DEMO / FIXTURE DATA</code> badge and
-                      preserved timestamp.
+                      <strong className="text-[var(--text-primary)]">Load a demo scenario:</strong> Click{" "}
+                      <code className="text-[var(--warning)]">Try Demo</code> or switch to Demo mode. Notice the amber{" "}
+                      <code className="text-[var(--warning)]">DEMO / FIXTURE DATA</code> badge and preserved timestamp.
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       B
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Inspect evidence classification:</strong> Expand the{" "}
-                      <em className="text-[#F5F7FA]">Detailed Evidence & Provenance</em> section. Observe{" "}
-                      <span className="text-[#5EA7FF]">FACT</span> (direct ticker fields),{" "}
-                      <span className="text-[#8B7CFF]">INFERENCE</span> (derived session & spread),{" "}
-                      <span className="text-[#F4C95D]">ASSUMPTION</span> (mapping conventions), and{" "}
-                      <span className="text-[#9BA3B2]">UNKNOWN</span> (unavailable US tape & news).
+                      <strong className="text-[var(--text-primary)]">Inspect evidence classification:</strong> Expand{" "}
+                      <em className="text-[var(--text-primary)]">Detailed Evidence & Provenance</em>. Observe{" "}
+                      <span className="text-[var(--info)] font-bold">FACT</span>,{" "}
+                      <span className="text-[var(--accent)] font-bold">INFERENCE</span>,{" "}
+                      <span className="text-[var(--warning)] font-bold">ASSUMPTION</span>, and{" "}
+                      <span className="text-[var(--text-muted)] font-bold">UNKNOWN</span>.
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       C
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Compose and challenge a structured claim:</strong> In the Claims &
-                      Challenge tab, select <code className="text-[#8B7CFF]">24h price change</code> is{" "}
-                      <code className="text-[#8B7CFF]">down</code> and run the challenge. Observe it is marked{" "}
-                      <span className="text-[#36D399]">supported</span> because the 24h change is -0.43%.
+                      <strong className="text-[var(--text-primary)]">Compose and challenge a structured claim:</strong> In the Claims & Challenge tab, select 24h price change is down and run the challenge. Observe it is marked{" "}
+                      <span className="text-[var(--positive)] font-bold">supported</span> because 24h change is -0.43%.
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       D
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Revise the claim:</strong> Change direction from{" "}
-                      <code className="text-[#8B7CFF]">down</code> to <code className="text-[#8B7CFF]">up</code> and click{" "}
-                      <em className="text-[#F5F7FA]">Revise and re-challenge</em>. Observe that the claim is now{" "}
-                      <span className="text-[#FF6B7A]">challenged</span> and a revision diff is recorded in the history panel.
+                      <strong className="text-[var(--text-primary)]">Revise the claim:</strong> Change direction from down to up and click Revise & re-test. Observe that the claim is now{" "}
+                      <span className="text-[var(--negative)] font-bold">challenged</span> and a revision diff is recorded in the history panel.
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       E
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Multi-symbol comparison:</strong> Switch to the{" "}
-                      <em className="text-[#F5F7FA]">Compare Symbols</em> tab and click{" "}
-                      <code className="text-[#8B7CFF]">Load Demo Comparison (rAAPL vs rNVDA)</code>. Observe the side-by-side
-                      comparison table where independent timestamps are preserved per column with explicit fixture tags.
+                      <strong className="text-[var(--text-primary)]">Multi-symbol comparison:</strong> Switch to Compare Symbols tab, click Evaluate Multi-Symbol Claims across rAAPL and rNVDA. Observe independent per-symbol timestamps.
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] font-mono text-[11px] font-bold text-white">
                       F
                     </span>
                     <div>
-                      <strong className="text-[#F5F7FA]">Export non-advisory report:</strong> In the Export tab, click{" "}
-                      <em className="text-[#F5F7FA]">Preview report</em> or export to Markdown/HTML/JSON. Confirm the report
-                      includes the unmistakable <code className="text-[#F4C95D]">DEMO / FIXTURE DATA</code> disclaimer and
-                      preserved snapshot timestamps.
+                      <strong className="text-[var(--text-primary)]">Export investigation report:</strong> Switch to Export Report tab, preview the non-advisory report, and verify that the demo warning banner is preserved.
                     </div>
                   </li>
                 </ol>
               </div>
 
+              {/* Direct Demo Selectors */}
               {onSelectDemoScenario && (
-                <div className="rounded-lg border border-[#F4C95D]/30 bg-[#F4C95D]/5 p-3.5">
-                  <h4 className="font-semibold text-[#F4C95D] uppercase tracking-wide text-[11px]">
-                    Quick Demo Scenario Launcher
-                  </h4>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-3.5">
+                  <p className="font-mono text-[11px] uppercase tracking-wide text-[var(--text-secondary)]">
+                    Quickly launch a demo fixture:
+                  </p>
+                  <div className="mt-2.5 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         onSelectDemoScenario("scenario-raapl-session-down");
                         onClose();
                       }}
-                      className={`flex flex-col items-start rounded-md border p-2 text-left transition-colors ${
+                      className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors ${
                         activeScenarioId === "scenario-raapl-session-down"
-                          ? "border-[#8B7CFF] bg-[#8B7CFF]/10"
-                          : "border-[#252B36] bg-[#10131A] hover:border-[#8B7CFF]/50"
+                          ? "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)] font-semibold"
+                          : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--warning-border)] hover:text-[var(--warning)]"
                       }`}
                     >
-                      <span className="font-data text-xs font-semibold text-[#F5F7FA]">rAAPL Down</span>
-                      <span className="mt-0.5 text-[10px] text-[#9BA3B2]">Regular session, -0.43% change</span>
+                      rAAPL · Regular Session Down
                     </button>
                     <button
                       type="button"
@@ -383,14 +359,13 @@ export function HowMirrorlineWorksModal({
                         onSelectDemoScenario("scenario-rnvda-overnight-up");
                         onClose();
                       }}
-                      className={`flex flex-col items-start rounded-md border p-2 text-left transition-colors ${
+                      className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors ${
                         activeScenarioId === "scenario-rnvda-overnight-up"
-                          ? "border-[#8B7CFF] bg-[#8B7CFF]/10"
-                          : "border-[#252B36] bg-[#10131A] hover:border-[#8B7CFF]/50"
+                          ? "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)] font-semibold"
+                          : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--warning-border)] hover:text-[var(--warning)]"
                       }`}
                     >
-                      <span className="font-data text-xs font-semibold text-[#F5F7FA]">rNVDA Overnight Up</span>
-                      <span className="mt-0.5 text-[10px] text-[#9BA3B2]">US_CLOSED, +1.20% move</span>
+                      rNVDA · Overnight Up
                     </button>
                     <button
                       type="button"
@@ -398,14 +373,13 @@ export function HowMirrorlineWorksModal({
                         onSelectDemoScenario("scenario-rtsla-weekend-stale");
                         onClose();
                       }}
-                      className={`flex flex-col items-start rounded-md border p-2 text-left transition-colors ${
+                      className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors ${
                         activeScenarioId === "scenario-rtsla-weekend-stale"
-                          ? "border-[#8B7CFF] bg-[#8B7CFF]/10"
-                          : "border-[#252B36] bg-[#10131A] hover:border-[#8B7CFF]/50"
+                          ? "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)] font-semibold"
+                          : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--warning-border)] hover:text-[var(--warning)]"
                       }`}
                     >
-                      <span className="font-data text-xs font-semibold text-[#F5F7FA]">rTSLA Stale & Weekend</span>
-                      <span className="mt-0.5 text-[10px] text-[#9BA3B2]">48s old ticker, partial book</span>
+                      rTSLA · Weekend Stale
                     </button>
                   </div>
                 </div>
@@ -414,17 +388,15 @@ export function HowMirrorlineWorksModal({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t border-[#252B36] bg-[#080A0F] px-6 py-3">
-          <p className="font-data text-[11px] text-[#626B7A]">
-            Bitget AI Hackathon Genesis Season 2 · Non-Advisory Decision Support
-          </p>
+        {/* Modal Footer */}
+        <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-3 text-[11px] text-[var(--text-muted)]">
+          <span>Bitget AI Hackathon Genesis Season 2 · Evaluator Resource</span>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-[#8B7CFF] px-4 py-1.5 text-xs font-medium text-[#080A0F] hover:bg-[#8B7CFF]/90"
+            className="rounded-lg bg-[var(--accent)] px-4 py-1.5 font-mono text-xs font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
           >
-            Got it
+            Close
           </button>
         </div>
       </div>

@@ -6,24 +6,33 @@ import type { EvidenceClass } from "@/lib/market/fields";
 import type { ClaimChangeKind, ClaimRevision, StatusChangeAttribution, ThesisRevision } from "@/lib/revision/types";
 
 function statusColor(status: ClaimAssessmentStatus) {
-  if (status === "supported") return "border-[#36D399]/40 bg-[#36D399]/10 text-[#36D399]";
-  if (status === "challenged") return "border-[#FF6B7A]/40 bg-[#FF6B7A]/10 text-[#FF6B7A]";
-  if (status === "unsupported") return "border-[#F4C95D]/40 bg-[#F4C95D]/10 text-[#F4C95D]";
-  return "border-[#8B7CFF]/40 bg-[#8B7CFF]/10 text-[#8B7CFF]";
+  if (status === "supported")
+    return "border-[var(--positive-border)] bg-[var(--positive-bg)] text-[var(--positive)]";
+  if (status === "challenged")
+    return "border-[var(--negative-border)] bg-[var(--negative-bg)] text-[var(--negative)]";
+  if (status === "unsupported")
+    return "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function changeColor(change: ClaimChangeKind) {
-  if (change === "added") return "border-[#36D399]/40 bg-[#36D399]/10 text-[#36D399]";
-  if (change === "removed") return "border-[#FF6B7A]/40 bg-[#FF6B7A]/10 text-[#FF6B7A]";
-  if (change === "edited") return "border-[#F4C95D]/40 bg-[#F4C95D]/10 text-[#F4C95D]";
-  return "border-[#252B36] bg-[#171B24] text-[#9BA3B2]";
+  if (change === "added")
+    return "border-[var(--positive-border)] bg-[var(--positive-bg)] text-[var(--positive)]";
+  if (change === "removed")
+    return "border-[var(--negative-border)] bg-[var(--negative-bg)] text-[var(--negative)]";
+  if (change === "edited")
+    return "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function classColor(classification: EvidenceClass) {
-  if (classification === "FACT") return "border-[#5EA7FF]/30 bg-[#5EA7FF]/10 text-[#5EA7FF]";
-  if (classification === "INFERENCE") return "border-[#8B7CFF]/30 bg-[#8B7CFF]/10 text-[#8B7CFF]";
-  if (classification === "ASSUMPTION") return "border-[#F4C95D]/30 bg-[#F4C95D]/10 text-[#F4C95D]";
-  return "border-[#626B7A]/40 bg-[#171B24] text-[#9BA3B2]";
+  if (classification === "FACT")
+    return "border-[var(--info-border)] bg-[var(--info-bg)] text-[var(--info)]";
+  if (classification === "INFERENCE")
+    return "border-[var(--accent-border)] bg-[var(--accent-light)] text-[var(--accent-text)] dark:text-[#86C495]";
+  if (classification === "ASSUMPTION")
+    return "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function Citations({
@@ -37,22 +46,22 @@ function Citations({
     return null;
   }
   return (
-    <p className="mt-2 flex flex-wrap gap-1">
+    <div className="mt-2 flex flex-wrap gap-1">
       {ids.map((id) => {
         const cited = citations[id];
         return (
           <a
             key={id}
             href={`#ev-${id}`}
-            className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${
-              cited ? classColor(cited.classification) : "border-[#252B36] text-[#9BA3B2]"
+            className={`rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase transition-opacity hover:opacity-80 ${
+              cited ? classColor(cited.classification) : "border-[var(--border)] text-[var(--text-muted)]"
             }`}
           >
             {cited ? `${cited.classification} · ${id}` : id}
           </a>
         );
       })}
-    </p>
+    </div>
   );
 }
 
@@ -80,37 +89,37 @@ function ClaimDiffCard({
 }) {
   const note = attributionCopy(claim.attribution);
   return (
-    <article className="border-b border-[#252B36] px-4 py-3 last:border-b-0">
+    <article className="border-b border-[var(--border-subtle)] p-4 last:border-b-0">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${changeColor(claim.change)}`}>
+        <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase font-bold ${changeColor(claim.change)}`}>
           {claim.change}
         </span>
-        <span className="font-data text-[10px] uppercase text-[#626B7A]">{claim.source}</span>
+        <span className="font-mono text-[10px] uppercase text-[var(--text-muted)]">{claim.source}</span>
         {claim.reordered ? (
-          <span className="rounded-full border border-[#8B7CFF]/30 px-2 py-0.5 font-data text-[10px] uppercase text-[#8B7CFF]">
+          <span className="rounded-full border border-[var(--accent-border)] bg-[var(--accent-light)] px-2 py-0.5 font-mono text-[10px] uppercase text-[var(--accent)] font-semibold">
             reordered
           </span>
         ) : null}
         {claim.statusChanged ? (
-          <span className="rounded-full border border-[#F4C95D]/30 px-2 py-0.5 font-data text-[10px] uppercase text-[#F4C95D]">
+          <span className="rounded-full border border-[var(--warning-border)] bg-[var(--warning-bg)] px-2 py-0.5 font-mono text-[10px] uppercase text-[var(--warning)] font-semibold">
             status changed
           </span>
         ) : null}
         {claim.evidenceRefsChanged ? (
-          <span className="rounded-full border border-[#5EA7FF]/30 px-2 py-0.5 font-data text-[10px] uppercase text-[#5EA7FF]">
+          <span className="rounded-full border border-[var(--info-border)] bg-[var(--info-bg)] px-2 py-0.5 font-mono text-[10px] uppercase text-[var(--info)] font-semibold">
             evidence refs changed
           </span>
         ) : null}
       </div>
       <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <div>
-          <p className="font-data text-[10px] uppercase tracking-wide text-[#626B7A]">Before</p>
-          <p className="mt-1 text-sm text-[#F5F7FA]">{claim.previousText || "—"}</p>
+        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">Before</p>
+          <p className="mt-1 text-xs text-[var(--text-primary)]">{claim.previousText || "—"}</p>
           <div className="mt-1 flex flex-wrap gap-1">
             {claim.previousAssessments.map((slice) => (
               <span
                 key={`prev-${slice.id}`}
-                className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${statusColor(slice.status)}`}
+                className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase ${statusColor(slice.status)}`}
               >
                 {slice.status}
                 {slice.kind ? ` · ${slice.kind}` : ""}
@@ -122,14 +131,14 @@ function ClaimDiffCard({
             citations={previousCitations}
           />
         </div>
-        <div>
-          <p className="font-data text-[10px] uppercase tracking-wide text-[#626B7A]">After</p>
-          <p className="mt-1 text-sm text-[#F5F7FA]">{claim.currentText || "—"}</p>
+        <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">After</p>
+          <p className="mt-1 text-xs text-[var(--text-primary)]">{claim.currentText || "—"}</p>
           <div className="mt-1 flex flex-wrap gap-1">
             {claim.currentAssessments.map((slice) => (
               <span
                 key={`curr-${slice.id}`}
-                className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${statusColor(slice.status)}`}
+                className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase ${statusColor(slice.status)}`}
               >
                 {slice.status}
                 {slice.kind ? ` · ${slice.kind}` : ""}
@@ -142,8 +151,8 @@ function ClaimDiffCard({
           />
         </div>
       </div>
-      <p className="mt-2 font-data text-[11px] text-[#626B7A]">Match: {claim.matchReason}</p>
-      {note ? <p className="mt-1 text-xs text-[#9BA3B2]">{note}</p> : null}
+      <p className="mt-2 font-mono text-[10px] text-[var(--text-muted)]">Match: {claim.matchReason}</p>
+      {note ? <p className="mt-1 text-xs text-[var(--text-secondary)]">{note}</p> : null}
     </article>
   );
 }
@@ -151,47 +160,54 @@ function ClaimDiffCard({
 export function ThesisRevisionPanel({
   history,
   selectedId,
+  selectedRevisionId,
   onSelect,
+  onSelectRevisionId,
   onRestore,
 }: {
   history: ThesisRevision[];
-  selectedId: string | null;
-  onSelect: (revisionId: string) => void;
+  selectedId?: string | null;
+  selectedRevisionId?: string | null;
+  onSelect?: (revisionId: string) => void;
+  onSelectRevisionId?: (revisionId: string) => void;
   onRestore?: (revision: ThesisRevision) => void;
 }) {
+  const activeSelectedId = selectedRevisionId ?? selectedId ?? null;
+  const handleSelect = onSelectRevisionId ?? onSelect ?? (() => {});
+
   if (history.length === 0) {
     return (
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-6 text-sm text-[#9BA3B2]">
-        After the first challenge, edit the thesis and revise it. The desk will keep a before/after history in this
-        session. No database is used.
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 text-xs text-[var(--text-muted)]">
+        After testing your initial idea, edit the thesis above and click revise. Mirrorline will track before/after changes directly in your browser session.
       </section>
     );
   }
 
-  const selected = history.find((item) => item.revisionId === selectedId) ?? history[history.length - 1];
+  const selected = history.find((item) => item.revisionId === activeSelectedId) ?? history[history.length - 1];
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-        <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">THESIS REVISION LOOP · NON-ADVISORY</p>
-        <h2 className="mt-2 text-lg font-medium">Compare revisions</h2>
-        <p className="mt-1 text-sm text-[#9BA3B2]">
-          Identity is preserved across reordering and light edits when fingerprints or token overlap match. A status
-          change is not a grade. Refreshing Bitget data marks a new evidence snapshot.
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-xs">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)] dark:text-[#86C495]">
+          Revision Tracking · Non-Advisory
+        </p>
+        <h3 className="mt-1 text-base font-semibold text-[var(--text-primary)]">Compare Idea Revisions</h3>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+          Claims are tracked across revisions. A status change is not a grade—it reflects how closely claims match evidence.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {history.map((item) => (
             <button
               key={item.revisionId}
               type="button"
-              onClick={() => onSelect(item.revisionId)}
-              className={`rounded-full border px-3 py-1 font-data text-xs ${
+              onClick={() => handleSelect(item.revisionId)}
+              className={`rounded-lg border px-3 py-1 font-mono text-xs transition-colors ${
                 item.revisionId === selected.revisionId
-                  ? "border-[#8B7CFF] text-[#8B7CFF]"
-                  : "border-[#252B36] text-[#9BA3B2]"
+                  ? "border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] font-semibold"
+                  : "border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:border-[var(--accent)]"
               }`}
             >
-              Rev {item.sequence}
+              Revision {item.sequence}
               {item.snapshotChanged ? " · snapshot changed" : ""}
             </button>
           ))}
@@ -199,17 +215,16 @@ export function ThesisRevisionPanel({
       </div>
 
       {selected.snapshotWarning ? (
-        <div className="rounded-xl border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-4 py-3 text-sm text-[#F4C95D]">
+        <div className="rounded-xl border border-[var(--warning-border)] bg-[var(--warning-bg)] p-3 text-xs text-[var(--warning)]">
           {selected.snapshotWarning}
         </div>
       ) : (
-        <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3 text-sm text-[#9BA3B2]">
-          Same evidence snapshot ({selected.currentSnapshot.retrievedAt}). Status changes come from the thesis edit,
-          not from a new tape.
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] p-3 text-xs text-[var(--text-secondary)]">
+          Same evidence snapshot ({selected.currentSnapshot.retrievedAt}). Status changes come from your thesis edit.
         </div>
       )}
 
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {(
           [
             ["Added", selected.summary.added],
@@ -218,31 +233,31 @@ export function ThesisRevisionPanel({
             ["Reordered", selected.summary.reordered],
           ] as const
         ).map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-[#626B7A]">{label}</p>
-            <p className="mt-1 font-data text-xl text-[#F5F7FA]">{value}</p>
+          <div key={label} className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-3 shadow-2xs">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
+            <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
-          <p className="font-data text-[10px] uppercase tracking-wide text-[#626B7A]">Previous thesis</p>
-          <p className="mt-2 text-sm text-[#F5F7FA]">{selected.originalThesis.thesis || "—"}</p>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-xs">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">Previous thesis</p>
+          <p className="mt-2 text-xs md:text-sm text-[var(--text-primary)]">{selected.originalThesis.thesis || "—"}</p>
           {selected.originalThesis.reason ? (
-            <p className="mt-2 text-xs text-[#9BA3B2]">Reason: {selected.originalThesis.reason}</p>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">Reason: {selected.originalThesis.reason}</p>
           ) : null}
         </div>
-        <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
-          <p className="font-data text-[10px] uppercase tracking-wide text-[#626B7A]">Revised thesis</p>
-          <p className="mt-2 text-sm text-[#F5F7FA]">{selected.revisedThesis.thesis || "—"}</p>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-xs">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">Revised thesis</p>
+          <p className="mt-2 text-xs md:text-sm text-[var(--text-primary)]">{selected.revisedThesis.thesis || "—"}</p>
           {selected.revisedThesis.reason ? (
-            <p className="mt-2 text-xs text-[#9BA3B2]">Reason: {selected.revisedThesis.reason}</p>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">Reason: {selected.revisedThesis.reason}</p>
           ) : null}
           {onRestore ? (
             <button
               type="button"
-              className="mt-3 h-9 rounded-md border border-[#252B36] px-3 text-xs text-[#9BA3B2]"
+              className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               onClick={() => onRestore(selected)}
             >
               Load this revision into the editor
@@ -251,16 +266,17 @@ export function ThesisRevisionPanel({
         </div>
       </div>
 
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-        <div className="border-b border-[#252B36] px-4 py-3">
-          <h3 className="text-sm font-medium">Claim-by-claim comparison</h3>
-          <p className="mt-1 text-xs text-[#9BA3B2]">
-            {selected.summary.statusChanged} status change(s) · {selected.summary.evidenceRefsChanged} evidence-reference
-            change(s). None of these are buy/sell advice.
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-xs">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">
+            Claim-by-claim comparison
+          </h4>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            {selected.summary.statusChanged} status change(s) · {selected.summary.evidenceRefsChanged} evidence-reference change(s).
           </p>
         </div>
         {selected.claims.length === 0 ? (
-          <p className="px-4 py-3 text-sm text-[#9BA3B2]">No claim units were extracted from either revision.</p>
+          <p className="px-4 py-3 text-xs text-[var(--text-muted)]">No claim units were extracted from either revision.</p>
         ) : (
           selected.claims.map((claim) => (
             <ClaimDiffCard

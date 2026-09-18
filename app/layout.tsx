@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Evidence-First Trading Desk for Bitget Reality rTokens",
+  title: "Mirrorline · Check If Your Trading Idea Matches Bitget's Real Data",
   description:
-    "Evidence-first, non-advisory decision support for 24/7 Bitget Reality rTokens. Stress-test interpretations, structured claims, revision diffs, and multi-symbol evidence comparison.",
+    "Mirrorline helps you check what Bitget's Reality rToken market data supports—and what it doesn't—before you act. Free research tool with no buy/sell signals or trade execution.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#080A0F] text-[#F5F7FA]">{children}</body>
+      <body className="min-h-full bg-[var(--bg-primary)] text-[var(--text-primary)]">{children}</body>
     </html>
   );
 }

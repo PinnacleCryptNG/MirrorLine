@@ -30,40 +30,50 @@ export function StructuredClaimComposer({
   };
 
   return (
-    <div className="rounded-md border border-[#252B36] bg-[#080A0F] px-3 py-3">
-      <p className="text-xs uppercase tracking-wide text-[#626B7A]">Structured claims</p>
-      <p className="mt-1 text-xs text-[#9BA3B2]">
-        Pick a kind and fill permitted fields. Choosing a type does not verify the claim. Reference price, news, and
-        Reality depth stay unanswered unless the pack actually has them.
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] px-4 py-3.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">
+          Structured Claim Builder
+        </p>
+        <span className="text-[11px] text-[var(--text-muted)]">
+          {claims.length} claim{claims.length === 1 ? "" : "s"} added
+        </span>
+      </div>
+      <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">
+        Choose a claim type below and fill in your idea. Choosing a type tests it against the evidence pack—it does not automatically verify it.
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      
+      <div className="mt-3 flex flex-wrap gap-1.5">
         {STRUCTURED_KIND_DEFS.map((def) => (
           <button
             key={def.kind}
             type="button"
-            className="rounded-full border border-[#252B36] px-3 py-1 font-data text-[11px] text-[#9BA3B2] hover:border-[#8B7CFF] hover:text-[#8B7CFF]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-3 py-1 font-mono text-[11px] text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors shadow-2xs"
             onClick={() => add(def.kind)}
           >
             + {def.label}
           </button>
         ))}
       </div>
-      <ul className="mt-3 space-y-3">
+
+      <ul className="mt-3.5 space-y-3">
         {claims.length === 0 ? (
-          <li className="text-sm text-[#9BA3B2]">No structured claims yet. Add one above, or use optional free text.</li>
+          <li className="rounded-lg border border-dashed border-[var(--border)] p-4 text-center text-xs text-[var(--text-muted)]">
+            No structured claims added yet. Click one of the buttons above to test price move, session, or spread.
+          </li>
         ) : (
           claims.map((claim, index) => {
             const def = kindDef(claim.kind);
             return (
-              <li key={claim.id} className="rounded-lg border border-[#252B36] bg-[#10131A] px-3 py-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-medium text-[#F5F7FA]">{def?.label ?? claim.kind}</p>
+              <li key={claim.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2.5">
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{def?.label ?? claim.kind}</p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       aria-label={`Move ${def?.label ?? claim.kind} claim up`}
                       disabled={index === 0}
-                      className="font-data text-[11px] text-[#9BA3B2] disabled:opacity-30"
+                      className="font-mono text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30"
                       onClick={() => move(index, -1)}
                     >
                       Up
@@ -72,7 +82,7 @@ export function StructuredClaimComposer({
                       type="button"
                       aria-label={`Move ${def?.label ?? claim.kind} claim down`}
                       disabled={index === claims.length - 1}
-                      className="font-data text-[11px] text-[#9BA3B2] disabled:opacity-30"
+                      className="font-mono text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30"
                       onClick={() => move(index, 1)}
                     >
                       Down
@@ -80,17 +90,17 @@ export function StructuredClaimComposer({
                     <button
                       type="button"
                       aria-label={`Remove ${def?.label ?? claim.kind} claim`}
-                      className="font-data text-[11px] text-[#FF6B7A]"
+                      className="font-mono text-[11px] text-[var(--negative)] hover:underline"
                       onClick={() => onChange(claims.filter((_, item) => item !== index))}
                     >
                       Remove
                     </button>
                   </div>
                 </div>
-                <p className="mt-1 text-xs text-[#9BA3B2]">{def?.limitation}</p>
+                <p className="mt-2 text-xs text-[var(--text-muted)]">{def?.limitation}</p>
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   {(def?.fields ?? []).map((field) => (
-                    <label key={field.key} className="flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[#626B7A]">
+                    <label key={field.key} className="flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[var(--text-secondary)] font-mono">
                       {field.label}
                       {field.input === "select" ? (
                         <select
@@ -101,7 +111,7 @@ export function StructuredClaimComposer({
                               fields: { ...claim.fields, [field.key]: event.target.value },
                             })
                           }
-                          className="h-10 rounded-md border border-[#252B36] bg-[#080A0F] px-2 text-sm text-[#F5F7FA] outline-none focus:border-[#8B7CFF]"
+                          className="h-9 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-2.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
                         >
                           {(field.options ?? []).map((option) => (
                             <option key={option} value={option}>
@@ -118,22 +128,23 @@ export function StructuredClaimComposer({
                               fields: { ...claim.fields, [field.key]: event.target.value },
                             })
                           }
-                          className="h-10 rounded-md border border-[#252B36] bg-[#080A0F] px-3 text-sm text-[#F5F7FA] outline-none focus:border-[#8B7CFF]"
+                          className="h-9 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-2.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
                         />
                       )}
-                      <span className="normal-case tracking-normal text-[#626B7A]">{field.note}</span>
+                      <span className="normal-case tracking-normal text-[10px] text-[var(--text-muted)]">{field.note}</span>
                     </label>
                   ))}
                 </div>
-                <label className="mt-3 flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[#626B7A]">
+                <label className="mt-3 flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[var(--text-secondary)] font-mono">
                   Optional explanation
                   <input
                     value={claim.explanation ?? ""}
                     onChange={(event) => update(index, { ...claim, explanation: event.target.value })}
-                    className="h-10 rounded-md border border-[#252B36] bg-[#080A0F] px-3 text-sm text-[#F5F7FA] outline-none focus:border-[#8B7CFF]"
+                    className="h-9 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-2.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                    placeholder="Why you believe this"
                   />
                 </label>
-                <label className="mt-3 flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[#626B7A]">
+                <label className="mt-3 flex flex-col gap-1 text-[11px] uppercase tracking-wide text-[var(--text-secondary)] font-mono">
                   Optional assumption
                   <input
                     value={claim.assumptions?.[0] ?? ""}
@@ -143,7 +154,8 @@ export function StructuredClaimComposer({
                         assumptions: event.target.value.trim() ? [event.target.value.trim()] : undefined,
                       })
                     }
-                    className="h-10 rounded-md border border-[#252B36] bg-[#080A0F] px-3 text-sm text-[#F5F7FA] outline-none focus:border-[#8B7CFF]"
+                    className="h-9 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-2.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                    placeholder="What you are taking as given without direct verification"
                   />
                 </label>
               </li>

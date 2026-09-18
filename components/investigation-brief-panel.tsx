@@ -7,11 +7,14 @@ import type {
   InvestigationTension,
 } from "@/lib/brief/types";
 
-function classColor(classification: EvidenceClass) {
-  if (classification === "FACT") return "border-[#5EA7FF]/30 bg-[#5EA7FF]/10 text-[#5EA7FF]";
-  if (classification === "INFERENCE") return "border-[#8B7CFF]/30 bg-[#8B7CFF]/10 text-[#8B7CFF]";
-  if (classification === "ASSUMPTION") return "border-[#F4C95D]/30 bg-[#F4C95D]/10 text-[#F4C95D]";
-  return "border-[#626B7A]/40 bg-[#171B24] text-[#9BA3B2]";
+function classBadge(classification: EvidenceClass) {
+  if (classification === "FACT")
+    return "border-[var(--info-border)] bg-[var(--info-bg)] text-[var(--info)]";
+  if (classification === "INFERENCE")
+    return "border-[var(--accent-border)] bg-[var(--accent-light)] text-[var(--accent-text)] dark:text-[#86C495]";
+  if (classification === "ASSUMPTION")
+    return "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function Citations({
@@ -25,22 +28,23 @@ function Citations({
     return null;
   }
   return (
-    <p className="mt-2 flex flex-wrap gap-1">
+    <div className="mt-2.5 flex flex-wrap gap-1.5">
       {ids.map((id) => {
         const cited = citations[id];
         return (
           <a
             key={id}
             href={`#ev-${id}`}
-            className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${
-              cited ? classColor(cited.classification) : "border-[#252B36] text-[#9BA3B2]"
+            className={`rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase transition-opacity hover:opacity-80 ${
+              cited ? classBadge(cited.classification) : "border-[var(--border)] text-[var(--text-muted)]"
             }`}
+            title={cited ? `${cited.classification}: ${cited.claim}` : id}
           >
             {cited ? `${cited.classification} · ${id}` : id}
           </a>
         );
       })}
-    </p>
+    </div>
   );
 }
 
@@ -52,13 +56,13 @@ function Paragraphs({
   citations: Record<string, CitedEvidence>;
 }) {
   if (paragraphs.length === 0) {
-    return <p className="px-4 py-3 text-sm text-[#9BA3B2]">No items in this section.</p>;
+    return <p className="px-4 py-3 text-xs text-[var(--text-muted)]">No items in this section.</p>;
   }
   return (
-    <div className="divide-y divide-[#252B36]">
+    <div className="divide-y divide-[var(--border-subtle)]">
       {paragraphs.map((paragraph) => (
         <div key={paragraph.id} className="px-4 py-3">
-          <p className="text-sm text-[#F5F7FA]">{paragraph.text}</p>
+          <p className="text-xs md:text-sm text-[var(--text-primary)] leading-relaxed">{paragraph.text}</p>
           <Citations ids={paragraph.evidenceIds} citations={citations} />
           {paragraph.evidenceIds.map((id) => {
             const cited = citations[id];
@@ -67,7 +71,7 @@ function Paragraphs({
               return null;
             }
             return (
-              <p key={`${paragraph.id}-${id}-src`} className="mt-1 font-data text-[11px] text-[#626B7A]">
+              <p key={`${paragraph.id}-${id}-src`} className="mt-1 font-mono text-[10px] text-[var(--text-muted)]">
                 {id}: {source.provider}
                 {source.endpoint ? ` · ${source.endpoint}` : ""} · {source.field}
                 {source.observedAt ? ` · observed ${source.observedAt}` : ""}
@@ -92,10 +96,10 @@ function Section({
   citations: Record<string, CitedEvidence>;
 }) {
   return (
-    <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-      <div className="border-b border-[#252B36] px-4 py-3">
-        <h3 className="text-sm font-medium">{section.title}</h3>
-        <p className="mt-1 text-xs text-[#9BA3B2]">{section.intro}</p>
+    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+      <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">{section.title}</h3>
+        <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">{section.intro}</p>
       </div>
       <Paragraphs paragraphs={section.paragraphs} citations={citations} />
     </section>
@@ -109,20 +113,55 @@ function TensionCard({
   tension: InvestigationTension;
   citations: Record<string, CitedEvidence>;
 }) {
-  const tone =
-    tension.severity === "contradiction"
-      ? "border-[#FF6B7A]/40 bg-[#FF6B7A]/10"
-      : "border-[#F4C95D]/40 bg-[#F4C95D]/10";
+  const isContradiction = tension.severity === "contradiction";
+  const borderTone = isContradiction
+    ? "border-[var(--negative-border)] bg-[var(--negative-bg)]"
+    : "border-[var(--warning-border)] bg-[var(--warning-bg)]";
+  const badgeTone = isContradiction
+    ? "text-[var(--negative)] bg-[var(--negative-bg)] border-[var(--negative-border)]"
+    : "text-[var(--warning)] bg-[var(--warning-bg)] border-[var(--warning-border)]";
+
+  // Split into plain English headline / first sentence, followed by technical explanation
+  const sentences = tension.explanation.split(". ");
+  const firstSentence = sentences[0] ? `${sentences[0]}.` : tension.explanation;
+  const remainingExplanation = sentences.length > 1 ? sentences.slice(1).join(". ") : null;
+
   return (
-    <article className={`rounded-xl border px-4 py-3 ${tone}`}>
+    <article className={`rounded-xl border p-4.5 shadow-2xs ${borderTone}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-data text-[10px] uppercase tracking-wide">
-          {tension.severity}
+        <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase font-bold tracking-wider ${badgeTone}`}>
+          {isContradiction ? "Direct Mismatch" : "Evidence Gap"}
         </span>
-        <h3 className="text-sm font-medium text-[#F5F7FA]">{tension.title}</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">{tension.title}</h3>
       </div>
-      <p className="mt-2 text-sm text-[#F5F7FA]">{tension.explanation}</p>
+
+      {/* 1. Plain English sentence first */}
+      <p className="mt-2 text-xs md:text-sm font-medium text-[var(--text-primary)] leading-relaxed">
+        {firstSentence}
+      </p>
+
+      {/* 2. Then technical details if available */}
+      {remainingExplanation && (
+        <p className="mt-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+          {remainingExplanation}
+        </p>
+      )}
+
+      {/* 3. Relevant technical citations and source provenance */}
       <Citations ids={tension.evidenceIds} citations={citations} />
+      
+      <div className="mt-2.5 pt-2 border-t border-[var(--border-subtle)] flex flex-col gap-1">
+        {tension.evidenceIds.map((id) => {
+          const cited = citations[id];
+          const source = cited?.sources[0];
+          if (!cited || !source) return null;
+          return (
+            <p key={`tension-${tension.id}-${id}`} className="font-mono text-[10px] text-[var(--text-muted)]">
+              <strong>{id}</strong> ({cited.classification}): {source.provider} {source.endpoint ? `· ${source.endpoint}` : ""} {source.observedAt ? `· observed ${source.observedAt}` : ""}
+            </p>
+          );
+        })}
+      </div>
     </article>
   );
 }
@@ -136,49 +175,63 @@ export function InvestigationBriefPanel({
 }) {
   if (!brief) {
     return (
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-6 text-sm text-[#9BA3B2]">
-        An investigation brief has not been generated yet. Verify live data to turn the evidence pack into a
-        non-advisory brief.
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-6 text-xs text-[var(--text-muted)]">
+        An investigation brief has not been generated yet. Load live or demo data to turn the evidence pack into an everyday brief.
       </section>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {!hideHeader && (
-        <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INVESTIGATION BRIEF · NON-ADVISORY</p>
-          <h2 className="mt-2 text-lg font-medium">{brief.question}</h2>
-          <p className="mt-1 font-data text-xs text-[#626B7A]">
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)] dark:text-[#86C495]">
+            Investigation Brief · Non-Advisory Research
+          </p>
+          <h2 className="mt-1 text-base md:text-lg font-semibold text-[var(--text-primary)]">
+            What does the data show for {brief.tokenSymbol}?
+          </h2>
+          <p className="mt-1 font-mono text-xs text-[var(--text-muted)]">
             {brief.tokenSymbol} · {brief.pair} · retrieved {brief.retrievedAt}
           </p>
         </section>
       )}
 
-      {/* Contradictions and key structural tensions first */}
+      {/* Contradictions and key structural tensions first: Plain English Title */}
       {brief.tensions.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-medium text-[#F5F7FA]">Key Structural Tensions & Contradictions</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+              What Doesn’t Fully Match (Mismatches & Evidence Gaps)
+            </h3>
+            <span className="font-mono text-xs text-[var(--text-muted)]">
+              {brief.tensions.length} item{brief.tensions.length === 1 ? "" : "s"} found
+            </span>
+          </div>
           {brief.tensions.map((tension) => (
             <TensionCard key={tension.id} tension={tension} citations={brief.citations} />
           ))}
         </section>
       )}
 
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-        <div className="border-b border-[#252B36] px-4 py-3">
-          <h3 className="text-sm font-medium">Executive summary</h3>
+      {/* Executive Summary */}
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-xs">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">Executive Summary</h3>
         </div>
         <Paragraphs paragraphs={brief.executiveSummary} citations={brief.citations} />
       </section>
 
-      {/* Detailed brief sections organized under clean disclosure */}
-      <details className="group rounded-xl border border-[#252B36] bg-[#10131A] overflow-hidden">
-        <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-xs font-medium text-[#9BA3B2] hover:bg-[#171B24] transition-colors">
-          <span className="font-data text-xs text-[#8B7CFF]">EXPLORE DETAILED BRIEF SECTIONS (Facts, Inferences, Assumptions, Unknowns)</span>
-          <span className="font-data text-[11px] text-[#8B7CFF] group-open:rotate-180 transition-transform">▼</span>
+      {/* Detailed brief sections organized under clean progressive disclosure */}
+      <details className="group rounded-xl border border-[var(--border)] bg-[var(--bg-card)] overflow-hidden shadow-xs">
+        <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] transition-colors">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[11px] font-bold text-[var(--accent)] dark:text-[#86C495]">DETAILED EVIDENCE BREAKDOWN</span>
+            <span>Facts, Inferences, Assumptions & Unknowns</span>
+          </div>
+          <span className="font-mono text-[11px] text-[var(--accent)] dark:text-[#86C495] group-open:rotate-180 transition-transform">▼</span>
         </summary>
-        <div className="border-t border-[#252B36] p-4 flex flex-col gap-4">
+        <div className="border-t border-[var(--border)] p-4 flex flex-col gap-4">
           <Section section={brief.marketAndSession} citations={brief.citations} />
           <Section section={brief.observedFacts} citations={brief.citations} />
           <Section section={brief.derivedInferences} citations={brief.citations} />
@@ -187,16 +240,16 @@ export function InvestigationBriefPanel({
         </div>
       </details>
 
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-        <div className="border-b border-[#252B36] px-4 py-3">
-          <h3 className="text-sm font-medium">What the evidence does not establish</h3>
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-xs">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">What the evidence does not establish</h3>
         </div>
         <Paragraphs paragraphs={brief.doesNotEstablish} citations={brief.citations} />
       </section>
 
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-        <div className="border-b border-[#252B36] px-4 py-3">
-          <h3 className="text-sm font-medium">Questions to investigate next</h3>
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-xs">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">Questions to investigate next</h3>
         </div>
         <Paragraphs paragraphs={brief.nextQuestions} citations={brief.citations} />
       </section>

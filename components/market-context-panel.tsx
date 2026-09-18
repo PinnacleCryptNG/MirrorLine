@@ -5,16 +5,16 @@ import type { MarketContext, ResourceFailure } from "@/lib/market/types";
 type FieldView = Pick<ContextField<unknown>, "kind" | "status" | "value" | "note" | "formula" | "unit">;
 
 function kindClass(kind: FieldKind) {
-  if (kind === "observed") return "border-[#5EA7FF]/30 bg-[#5EA7FF]/10 text-[#5EA7FF]";
-  if (kind === "derived") return "border-[#8B7CFF]/30 bg-[#8B7CFF]/10 text-[#8B7CFF]";
-  return "border-[#626B7A]/40 bg-[#171B24] text-[#9BA3B2]";
+  if (kind === "observed") return "border-[var(--info-border)] bg-[var(--info-bg)] text-[var(--info)]";
+  if (kind === "derived") return "border-[var(--accent-border)] bg-[var(--accent-light)] text-[var(--accent-text)] dark:text-[#86C495]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function statusClass(status: FieldStatus) {
-  if (status === "ok") return "border-[#36D399]/30 bg-[#36D399]/10 text-[#36D399]";
-  if (status === "stale") return "border-[#F4C95D]/30 bg-[#F4C95D]/10 text-[#F4C95D]";
-  if (status === "error") return "border-[#FF6B7A]/30 bg-[#FF6B7A]/10 text-[#FF6B7A]";
-  return "border-[#626B7A]/40 bg-[#171B24] text-[#9BA3B2]";
+  if (status === "ok") return "border-[var(--positive-border)] bg-[var(--positive-bg)] text-[var(--positive)]";
+  if (status === "stale") return "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning)]";
+  if (status === "error") return "border-[var(--negative-border)] bg-[var(--negative-bg)] text-[var(--negative)]";
+  return "border-[var(--border)] bg-[var(--bg-subtle)] text-[var(--text-secondary)]";
 }
 
 function formatValue(field: FieldView): string {
@@ -69,18 +69,18 @@ function FieldRow({
   field: FieldView;
 }) {
   return (
-    <div className="grid gap-1 border-b border-[#252B36] py-2.5 last:border-b-0 md:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)_auto] md:items-start md:gap-3">
-      <p className="text-xs uppercase tracking-wide text-[#626B7A]">{label}</p>
+    <div className="grid gap-1 border-b border-[var(--border-subtle)] py-2.5 last:border-b-0 md:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)_auto] md:items-start md:gap-3">
+      <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)] font-mono">{label}</p>
       <div>
-        <p className="font-data text-sm text-[#F5F7FA]">{formatValue(field)}</p>
-        {field.note ? <p className="mt-1 text-xs text-[#9BA3B2]">{field.note}</p> : null}
-        {field.formula ? <p className="mt-1 font-data text-[11px] text-[#626B7A]">{field.formula}</p> : null}
+        <p className="font-mono text-xs md:text-sm text-[var(--text-primary)]">{formatValue(field)}</p>
+        {field.note ? <p className="mt-0.5 text-xs text-[var(--text-muted)]">{field.note}</p> : null}
+        {field.formula ? <p className="mt-0.5 font-mono text-[10px] text-[var(--text-muted)]">{field.formula}</p> : null}
       </div>
       <div className="flex flex-wrap gap-1 md:justify-end">
-        <span className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${kindClass(field.kind)}`}>
+        <span className={`rounded-full border px-2 py-0.2 font-mono text-[10px] uppercase font-bold ${kindClass(field.kind)}`}>
           {field.kind}
         </span>
-        <span className={`rounded-full border px-2 py-0.5 font-data text-[10px] uppercase ${statusClass(field.status)}`}>
+        <span className={`rounded-full border px-2 py-0.2 font-mono text-[10px] uppercase font-bold ${statusClass(field.status)}`}>
           {field.status}
         </span>
       </div>
@@ -90,9 +90,9 @@ function FieldRow({
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
-      <div className="border-b border-[#252B36] px-4 py-3">
-        <h2 className="text-sm font-medium">{title}</h2>
+    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-xs">
+      <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] font-mono">{title}</h3>
       </div>
       <div className="px-4 py-1">{children}</div>
     </section>
@@ -108,8 +108,8 @@ export function MarketContextPanel({
 }) {
   if (!context) {
     return (
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-6 text-sm text-[#9BA3B2]">
-        Market context has not loaded yet. Verify live data to label observed, derived, and unavailable fields.
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-6 text-xs text-[var(--text-muted)]">
+        Market context has not loaded yet. Load live or demo data to inspect observed, derived, and unavailable fields.
       </section>
     );
   }
@@ -119,7 +119,7 @@ export function MarketContextPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <CoverageStat label="Observed" value={context.coverage.observed} />
         <CoverageStat label="Derived" value={context.coverage.derived} />
         <CoverageStat label="Unavailable" value={context.coverage.unavailable} />
@@ -130,13 +130,13 @@ export function MarketContextPanel({
       </div>
 
       {failures.length > 0 ? (
-        <div className="rounded-lg border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-4 py-3 text-sm text-[#F4C95D]">
+        <div className="rounded-xl border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4 text-xs text-[var(--warning)]">
           Partial context. Failed resources are labeled, not replaced with fabricated values.
-          <ul className="mt-2 space-y-1 text-[#F5F7FA]">
+          <ul className="mt-2 space-y-1 text-[var(--text-primary)]">
             {failures.map((failure) => (
               <li key={`${failure.resource}:${failure.message}`}>
-                <span className="font-data text-xs">{failure.resource}</span>
-                {failure.code ? <span className="text-[#9BA3B2]"> ({failure.code})</span> : null}
+                <span className="font-mono text-xs">{failure.resource}</span>
+                {failure.code ? <span className="text-[var(--text-muted)]"> ({failure.code})</span> : null}
                 {": "}
                 {failure.message}
               </li>
@@ -169,7 +169,7 @@ export function MarketContextPanel({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Candle history">
-          <p className="py-2 text-xs text-[#9BA3B2]">
+          <p className="py-2 text-xs text-[var(--text-muted)]">
             Requested interval {context.candles.interval}. Bitget rToken docs support{" "}
             {context.candles.supportedIntervals.join(", ")}. Type is market only.
           </p>
@@ -195,8 +195,8 @@ export function MarketContextPanel({
               {windows.map((window) => (
                 <li
                   key={`${window.state}-${window.startTime}`}
-                  className={`font-data text-xs ${
-                    window.state === currentState ? "text-[#8B7CFF]" : "text-[#9BA3B2]"
+                  className={`font-mono text-xs ${
+                    window.state === currentState ? "text-[var(--accent)] font-semibold" : "text-[var(--text-secondary)]"
                   }`}
                 >
                   {window.state} {window.startTime}–{window.endTime} {window.timeZone}
@@ -207,8 +207,8 @@ export function MarketContextPanel({
           ) : null}
           {context.session.derivation.length > 0 ? (
             <details className="pb-3">
-              <summary className="cursor-pointer text-xs text-[#9BA3B2]">Derivation notes</summary>
-              <ul className="mt-2 space-y-1 text-xs text-[#626B7A]">
+              <summary className="cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]">Derivation notes</summary>
+              <ul className="mt-2 space-y-1 text-xs text-[var(--text-muted)]">
                 {context.session.derivation.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
@@ -220,7 +220,7 @@ export function MarketContextPanel({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Reference relationship">
-          <p className="py-2 text-xs text-[#9BA3B2]">{context.reference.note}</p>
+          <p className="py-2 text-xs text-[var(--text-muted)]">{context.reference.note}</p>
           <FieldRow label="Underlying symbol" field={context.reference.underlyingSymbol} />
           <FieldRow label="Underlying name" field={context.reference.underlyingName} />
           <FieldRow label="Token price" field={context.reference.tokenPrice} />
@@ -232,15 +232,15 @@ export function MarketContextPanel({
         </Panel>
 
         <Panel title="Depth (optional, labeled)">
-          <p className="py-2 text-xs text-[#9BA3B2]">{context.depth.note}</p>
+          <p className="py-2 text-xs text-[var(--text-muted)]">{context.depth.note}</p>
           <FieldRow label="Public UTA book" field={context.depth.publicUtaBook} />
           <FieldRow label="Reality book" field={context.depth.realityBook} />
         </Panel>
       </div>
 
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3 text-sm text-[#9BA3B2]">
-        <h2 className="mb-2 text-sm font-medium text-[#F5F7FA]">Context limitations</h2>
-        <ul className="space-y-2">
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 text-xs text-[var(--text-secondary)] shadow-xs">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] font-mono">Context limitations</h3>
+        <ul className="space-y-1.5">
           {context.limitations.map((note) => (
             <li key={note}>• {note}</li>
           ))}
@@ -252,9 +252,9 @@ export function MarketContextPanel({
 
 function CoverageStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
-      <p className="text-xs uppercase tracking-wide text-[#626B7A]">{label}</p>
-      <p className="mt-1 font-data text-xl text-[#F5F7FA]">{value}</p>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-4 shadow-xs">
+      <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

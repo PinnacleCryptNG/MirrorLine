@@ -35,20 +35,20 @@ function FieldBlock({
 }) {
   if (!field) {
     return (
-      <article className="rounded-lg border border-[#252B36] bg-[#080A0F] px-3 py-3">
-        <p className="font-data text-[10px] uppercase text-[#626B7A]">{label}</p>
-        <p className="mt-1 text-sm text-[#9BA3B2]">Not present in this pack.</p>
+      <article className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-3">
+        <p className="font-mono text-[10px] uppercase text-[var(--text-muted)]">{label}</p>
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">Not present in this pack.</p>
       </article>
     );
   }
   return (
-    <article className="rounded-lg border border-[#252B36] bg-[#080A0F] px-3 py-3">
-      <p className="font-data text-[10px] uppercase text-[#626B7A]">{label}</p>
-      <p className="mt-1 text-sm text-[#F5F7FA]">
+    <article className="rounded-lg border border-[var(--border)] bg-[var(--bg-subtle)] p-3">
+      <p className="font-mono text-[10px] uppercase text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-[var(--text-primary)]">
         {field.classification} · {field.status} · {field.value === null ? "—" : String(field.value)}
       </p>
-      <p className="mt-1 text-xs text-[#9BA3B2]">{field.claim}</p>
-      <p className="mt-1 font-data text-[11px] text-[#626B7A]">
+      <p className="mt-1 text-xs text-[var(--text-secondary)]">{field.claim}</p>
+      <p className="mt-1 font-mono text-[10px] text-[var(--text-muted)]">
         {[field.endpoint, field.field].filter(Boolean).join(" · ") || "source not attached"}
         {field.observedAt ? ` · observed ${field.observedAt}` : ""}
         {field.freshnessSeconds !== null && field.freshnessSeconds !== undefined ? ` · age ${field.freshnessSeconds}s` : ""}
@@ -119,40 +119,48 @@ export function InvestigationReportPanel({
   };
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-        <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INVESTIGATION REPORT · NON-ADVISORY</p>
-        <h2 className="mt-2 text-lg font-medium">Export this investigation</h2>
-        <p className="mt-1 text-sm text-[#9BA3B2]">
-          Assembles the currently loaded evidence pack, brief, challenge, and revision trail. Export does not refresh
-          Bitget data. Report creation time is separate from source timestamps.
+    <section className="flex flex-col gap-6">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--accent)] dark:text-[#86C495]">
+          Investigation Report · Non-Advisory
         </p>
+        <h2 className="mt-1 text-base md:text-lg font-semibold text-[var(--text-primary)]">
+          Export this investigation
+        </h2>
+        <p className="mt-1 text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed">
+          Assembles the currently loaded evidence pack, brief, challenge, and revision trail. Export does not refresh Bitget data; report creation time is kept separate from source timestamps.
+        </p>
+
         {!pack || !brief ? (
-          <p className="mt-3 text-sm text-[#9BA3B2]">Verify live data or load a demo fixture to inspect and export a report.</p>
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Load live data or a demo fixture first to inspect and export a report.
+          </p>
         ) : null}
+
         {report?.isDemoFixture ? (
-          <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-sm text-[#F4C95D]">
+          <div className="mt-3 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] p-3 text-xs text-[var(--warning)]">
             <p className="font-semibold uppercase tracking-wide text-xs">DEMO / FIXTURE DATA</p>
-            <p className="mt-0.5 text-xs text-[#F4C95D]/90">
+            <p className="mt-0.5 text-xs">
               This report will be exported from frozen demonstration fixtures ({report.fixtureLabel ?? report.fixtureId ?? "fixture"}). It does not represent live Bitget market conditions.
             </p>
           </div>
         ) : null}
+
         {report?.snapshot.stale || report?.snapshot.warning ? (
-          <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-sm text-[#F4C95D]">
+          <div className="mt-3 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] p-3 text-xs text-[var(--warning)]">
             {report.snapshot.stale ? (
               <p>
-                Stale evidence is present ({report.snapshot.staleEvidenceIds.join(", ")}). Stale facts keep their older
-                timestamps.
+                Stale evidence is present ({report.snapshot.staleEvidenceIds.join(", ")}). Stale facts keep their older timestamps.
               </p>
             ) : null}
             {report.snapshot.warning ? <p className="mt-1">{report.snapshot.warning}</p> : null}
           </div>
         ) : null}
+
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            className="h-10 rounded-md bg-[#8B7CFF] px-4 text-sm font-medium text-[#080A0F] disabled:opacity-60"
+            className="rounded-lg bg-[var(--accent)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50 transition-colors shadow-xs"
             disabled={!report}
             onClick={() => setOpen((current) => !current)}
           >
@@ -160,7 +168,7 @@ export function InvestigationReportPanel({
           </button>
           <button
             type="button"
-            className="h-10 rounded-md border border-[#252B36] px-4 text-sm text-[#F5F7FA] disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3.5 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] disabled:opacity-50 transition-colors"
             disabled={!report}
             onClick={() => exportReport("markdown")}
           >
@@ -168,7 +176,7 @@ export function InvestigationReportPanel({
           </button>
           <button
             type="button"
-            className="h-10 rounded-md border border-[#252B36] px-4 text-sm text-[#F5F7FA] disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3.5 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] disabled:opacity-50 transition-colors"
             disabled={!report}
             onClick={() => exportReport("json")}
           >
@@ -176,7 +184,7 @@ export function InvestigationReportPanel({
           </button>
           <button
             type="button"
-            className="h-10 rounded-md border border-[#252B36] px-4 text-sm text-[#F5F7FA] disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3.5 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] disabled:opacity-50 transition-colors"
             disabled={!report}
             onClick={() => exportReport("html")}
           >
@@ -184,70 +192,64 @@ export function InvestigationReportPanel({
           </button>
           <button
             type="button"
-            className="h-10 rounded-md border border-[#8B7CFF]/40 px-4 text-sm text-[#8B7CFF] disabled:opacity-60"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3.5 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] disabled:opacity-50 transition-colors"
             disabled={!report}
             onClick={() => exportReport("print")}
           >
             Print / save as PDF
           </button>
         </div>
+
         {error ? (
-          <p role="alert" aria-live="polite" className="mt-3 text-sm text-[#FF6B7A]">
+          <p role="alert" aria-live="polite" className="mt-3 text-xs text-[var(--negative)]">
             {error}
           </p>
         ) : null}
       </div>
 
       {open && report ? (
-        <div className="report-print-root rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-data text-[10px] uppercase tracking-wide text-[#8B7CFF]">Non-advisory report preview</p>
+        <div className="report-print-root rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--accent)] dark:text-[#86C495]">
+              Non-advisory report preview
+            </p>
             {report.isDemoFixture ? (
-              <span className="rounded-full border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-2 py-0.5 font-data text-[10px] text-[#F4C95D]">
+              <span className="rounded-full border border-[var(--warning-border)] bg-[var(--warning-bg)] px-2.5 py-0.5 font-mono text-[10px] text-[var(--warning)] font-bold">
                 DEMO / FIXTURE DATA
               </span>
             ) : null}
           </div>
-          <h3 className="mt-2 text-xl font-medium text-[#F5F7FA]">{report.tokenSymbol} investigation report</h3>
+
+          <h3 className="mt-3 text-base md:text-lg font-semibold text-[var(--text-primary)]">
+            {report.tokenSymbol} Investigation Report
+          </h3>
+
           {report.isDemoFixture ? (
-            <div className="mt-3 rounded-md border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-3 py-2 text-xs text-[#F4C95D]">
+            <div className="mt-3 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] p-3 text-xs text-[var(--warning)]">
               <strong>DEMO / FIXTURE DATA:</strong> Scenario {report.fixtureLabel ?? report.fixtureId}. Timestamps are preserved from the recorded scenario and not refreshed from live markets.
             </div>
           ) : null}
-          <ul className="mt-3 space-y-1 text-sm text-[#9BA3B2]">
-            <li>Report created: {report.createdAt}</li>
-            <li>Evidence snapshot retrieved: {report.snapshot.retrievedAt}{report.isDemoFixture ? " (fixture timestamp)" : ""}</li>
-            <li>Snapshot id: {report.snapshot.id}</li>
-            <li>Question: {report.question}</li>
+
+          <ul className="mt-3 space-y-1 text-xs text-[var(--text-secondary)]">
+            <li><strong>Report created:</strong> {report.createdAt}</li>
+            <li><strong>Evidence snapshot retrieved:</strong> {report.snapshot.retrievedAt}{report.isDemoFixture ? " (fixture timestamp)" : ""}</li>
+            <li><strong>Snapshot id:</strong> <code className="font-mono">{report.snapshot.id}</code></li>
+            <li><strong>Question:</strong> {report.question}</li>
           </ul>
-          <p className="mt-3 text-sm text-[#9BA3B2]">{report.disclaimers[0]}</p>
+
+          <p className="mt-3 text-xs text-[var(--text-muted)] italic">{report.disclaimers[0]}</p>
+
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <FieldBlock label="Last price" field={report.contextSummary.lastPrice} />
             <FieldBlock label="24-hour change" field={report.contextSummary.change24h} />
             <FieldBlock label="US session" field={report.contextSummary.session} />
             <FieldBlock label="Reference price" field={report.contextSummary.referencePrice} />
           </div>
-          <p className="mt-4 text-sm text-[#9BA3B2]">
-            Evidence: FACT {report.classifications.fact} · INFERENCE {report.classifications.inference} · ASSUMPTION{" "}
-            {report.classifications.assumption} · UNKNOWN {report.classifications.unknown}. Challenge{" "}
-            {report.challenge
-              ? `${report.challenge.summary.supported} supported / ${report.challenge.summary.challenged} challenged / ${report.challenge.summary.unsupported} unsupported / ${report.challenge.summary.unassessed} unassessed`
-              : "not attached"}
-            . Revisions {report.revisions.length}.
-          </p>
-          {report.failures.length > 0 ? (
-            <p className="mt-3 text-sm text-[#F4C95D]">
-              Partial data: {report.failures.map((failure) => `${failure.resource} (${failure.message})`).join(" · ")}.
-              Missing resources are not treated as proof against a claim.
-            </p>
-          ) : null}
-          <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-[#9BA3B2]">
-            {report.tensions.slice(0, 4).map((tension) => (
-              <li key={tension.id}>
-                {tension.severity}: {tension.title}
-              </li>
-            ))}
-          </ul>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <FieldBlock label="Underlying asset" field={report.contextSummary.underlying} />
+            <FieldBlock label="Public orderbook depth" field={report.contextSummary.publicUtaDepth} />
+          </div>
         </div>
       ) : null}
     </section>
