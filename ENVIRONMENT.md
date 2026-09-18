@@ -1,28 +1,63 @@
-# Mirrorline environment
+# Mirrorline Environment & Configuration
 
-Copy `.env.example` to `.env.local` for local development.
+Mirrorline is designed to run locally or deployed with zero mandatory external API keys for its core evaluation and demo workflows.
 
-## Required for Milestone 9 multi-symbol comparison
+## Quick Start (Zero Credentials Required)
 
-None. Comparison export scores already-loaded per-symbol packs against shared structured claims. No LLM key or database is required.
+To evaluate Mirrorline locally:
 
-## Optional
+```bash
+# 1. Clone repository
+git clone <repo-url>
+cd mirrorline
 
-These are only needed for Reality-specific order book depth and platform fills.
+# 2. Install dependencies
+pnpm install
 
-```
-BITGET_API_KEY=
-BITGET_API_SECRET=
-BITGET_PASSPHRASE=
-```
+# 3. Copy example environment
+cp .env.example .env.local
 
-Even with credentials, Bitget documents Reality order-book depth and fills as whitelist-gated. Contact Bitget BD if those endpoints return auth or whitelist errors.
-
-## Timeouts
-
-```
-BITGET_TIMEOUT_MS=10000
-BITGET_BASE_URL=https://api.bitget.com
+# 4. Start development server
+pnpm dev
 ```
 
-Never put secrets in frontend code or `NEXT_PUBLIC_*` variables.
+The app will start on [http://localhost:43123](http://localhost:43123).
+
+## Environment Variables
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `NODE_ENV` | No | `development` | Node runtime environment |
+| `NEXT_PUBLIC_APP_URL` | No | `http://localhost:43123` | Canonical app URL for origin references |
+| `BITGET_BASE_URL` | No | `https://api.bitget.com` | Base URL for public and authenticated Bitget UTA REST calls |
+| `BITGET_TIMEOUT_MS` | No | `10000` | HTTP timeout (in milliseconds) for Bitget upstream requests |
+| `BITGET_API_KEY` | Optional | `""` | Bitget API key (server-side only; needed only for whitelist-gated Reality depth) |
+| `BITGET_API_SECRET` | Optional | `""` | Bitget API secret (server-side only) |
+| `BITGET_PASSPHRASE` | Optional | `""` | Bitget API passphrase (server-side only) |
+
+## Feature Matrix by Credential Level
+
+| Feature | No Keys (Demo Mode) | No Keys (Live Mode) | With Bitget API Keys |
+| --- | :---: | :---: | :---: |
+| **Reproducible Demo Mode** (`rAAPL`, `rNVDA`, `rTSLA`) | **Full** | **Full** | **Full** |
+| **First-Time Orientation & Judge Guide** | **Full** | **Full** | **Full** |
+| **Live Instrument Discovery** (`GET /api/v3/market/instruments`) | — | **Full** | **Full** |
+| **Live Ticker & 24h Change** (`GET /api/v3/market/tickers`) | — | **Full** | **Full** |
+| **Live Kline/Candlestick History** (`GET /api/v3/market/candles`) | — | **Full** | **Full** |
+| **Live Session & Calendar Normalization** | — | **Full** | **Full** |
+| **Live Public Order Book (UTA top 15)** | — | **Full** | **Full** |
+| **Evidence Pack Generation & Classification** | **Full** | **Full** | **Full** |
+| **Investigation Brief & Tension Analysis** | **Full** | **Full** | **Full** |
+| **Structured Claim Composer & Scoring** | **Full** | **Full** | **Full** |
+| **Thesis Revision Loop & Diff Tracking** | **Full** | **Full** | **Full** |
+| **Single-Symbol Investigation Report Export** | **Full** | **Full** | **Full** |
+| **Multi-Symbol Comparison Desk & Export** | **Full** | **Full** | **Full** |
+| **Reality 40-level Book Depth** | Unavailable | Unavailable | Whitelist-gated by Bitget BD |
+| **Reality Platform Fills** | Unavailable | Unavailable | Whitelist-gated by Bitget BD |
+
+## Security & Trust Safeguards
+
+1. **No Frontend Exposure**: Bitget credentials (`BITGET_API_KEY`, `BITGET_API_SECRET`, `BITGET_PASSPHRASE`) are strictly server-side environment variables. None are prefixed with `NEXT_PUBLIC_` and none are ever transmitted to the client.
+2. **JSON Redaction**: Serializers actively scan and redact sensitive keys (`apiKey`, `secret`, `passphrase`, `token`, `password`, `auth`) before returning API responses or exporting reports.
+3. **HTML Sanitization**: All user-supplied text (claims, reasons, free-text hypotheses) is strictly escaped before rendering HTML reports or comparison exports.
+4. **No LLM or Remote Execution**: No external LLM API keys (OpenAI, Anthropic, etc.) are needed or invoked. All evidence parsing and scoring is 100% deterministic, transparent, and auditable.

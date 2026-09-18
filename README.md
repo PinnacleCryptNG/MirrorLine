@@ -1,114 +1,202 @@
 # Mirrorline
 
-Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
+**Evidence-First AI Trading Desk for 24/7 Bitget Reality rToken Markets**  
+*Bitget AI Hackathon Genesis Season 2 Submission*
 
-This repository currently ships **Milestone 11 — Hackathon Demo Readiness & Reproducible Demo Mode** for the Bitget AI × Crypto Hackathon Genesis Season 2.
+Mirrorline is an evidence-first, non-advisory AI trading desk purpose-built to stress-test trader interpretations against empirical market evidence. It evaluates claims against real-time Bitget UTA data or deterministic demo fixtures without generating buy/sell advice, predicting price targets, executing orders, or fabricating missing tape data.
 
-It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
+---
 
-## What works now
+## The Problem: The 24/7 RWA Reality Gap
 
-- **First-time user orientation**: Clear, accessible in-product guidance explaining what Mirrorline does and deliberately does not do, core evidence classifications (**FACT**, **INFERENCE**, **ASSUMPTION**, **UNKNOWN**), and assessment statuses (supported by evidence only, not proof of a profitable trading outcome).
-- **Reproducible demo fixture mode**: Three deterministic, frozen test scenarios (`rAAPL` regular session down, `rNVDA` overnight upside & session tension, `rTSLA` weekend session with stale ticker and partial failure resilience) with preserved source timestamps.
-- **Unmistakable demo labeling**: Every demo surface, preview card, and export (JSON, Markdown, HTML, print) is prominently stamped with `DEMO / FIXTURE DATA` and scenario metadata.
-- **Strict live vs. demo isolation**: Demo mode never queries live Bitget endpoints or silently falls back to live data. Live mode never silently substitutes fixtures.
-- Discover Reality rToken instruments and retrieve Bitget ticker, candles, session, and stock metadata
-- Normalize a market context that labels every field observed, derived, or unavailable
-- Build a per-investigation **evidence pack** that classifies claims as **FACT**, **INFERENCE**, **ASSUMPTION**, or **UNKNOWN**
-- Compose a deterministic, non-advisory **investigation brief** with session context, tensions, and explicit unknowns
-- Stress-test a trader's initial interpretation with a deterministic **interpretation challenge** (supported / challenged / unsupported / unassessed)
-- Revise that thesis and **diff before/after challenges**, keeping claim identity across reorders and light edits
-- Compose **structured claims** with explicit kinds and fields, then challenge them without treating the type as proof
-- Export a **non-advisory investigation report** (preview, Markdown, JSON, print-friendly HTML) from the currently loaded snapshot
-- Compare the **same structured claims across multiple rTokens** with independently labeled snapshots and export a comparison report
-- 1-click **demo comparison evaluation** (`rAAPL` vs `rNVDA`) with independent snapshots, per-column fixture tags, and distinct claim assessments
-- Hardened multi-symbol comparison desk with single-column snapshot reload/retry, live auto-recomputing of shared claims, accessible form labels, and popup-safe print windows
-- Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
-- Trace each item to a Bitget source field, timestamp, and freshness window
-- Keep missing, stale, failed, and unverified data as explicit UNKNOWN or stale FACT items
-- Leave reference price, divergence, news, and Reality 40-level depth unanswered unless Bitget actually returns them
-- A verification desk plus `pnpm verify:bitget`
+Bitget Reality rTokens allow global traders to trade equity-backed synthetic tokens 24/7, including when underlying US equity exchanges are closed. This creates severe structural hazards:
 
-## Run locally
+1. **Session Divergence**: Token prices can decouple or drift during overnight and weekend hours while the underlying US market is shut. Traders often mistake overnight liquidity movements for true underlying price discovery.
+2. **Illusion of Completeness**: Public exchange APIs lack live US consolidated exchange tape, company earnings news, or deep institutional books. AI agents frequently hallucinate missing reference prices or treat absences as bearish signals.
+3. **Advisory Fallacy**: Conventional AI trading bots offer unverified buy/sell recommendations with black-box confidence scores, encouraging overleveraged trades without showing the provenance of their underlying assumptions.
+
+### Mirrorline's Solution
+
+Mirrorline acts as an **auditable defense layer**:
+- **Stress-Tests Hypotheses**: Evaluates trader interpretations against loaded Bitget context.
+- **Classifies All Information**: Separates direct **FACT**s from formulaic **INFERENCE**s, convention **ASSUMPTION**s, and explicit **UNKNOWN**s.
+- **Surfaces Structural Tensions**: Exposes session misalignments, wide off-hours spreads, and stale quotes.
+- **Strictly Non-Advisory**: Does not predict prices, pick winners, or execute trades. A `supported` claim means it aligns with loaded evidence — not that it will be profitable.
+
+---
+
+## 3–5 Minute Judge Walkthrough (Zero Credentials Required)
+
+To evaluate Mirrorline immediately without API keys or live market movements:
+
+1. **Launch the Desk**:
+   ```bash
+   pnpm install && cp .env.example .env.local && pnpm dev
+   ```
+   Open [http://localhost:43123](http://localhost:43123) in your browser.
+
+2. **Step A: Activate Demo Fixture Mode & Load Scenario**
+   - Click **`◆ Demo Fixture Mode`** in the header or select **`rAAPL · Regular Session Down`** from the orientation card.
+   - *Observation*: Notice the unmistakable amber **`DEMO / FIXTURE DATA`** banner, frozen timestamp (`2026-09-17T15:00:00.000Z`), and ticker stat cards.
+
+3. **Step B: Inspect Evidence Classification & Structural Tensions**
+   - Scroll to **Investigation Evidence Pack** and **Investigation Brief**.
+   - *Observation*: Notice the breakdown of evidence:
+     - **FACT**: 24h change (-0.43%), last price ($332.90), ticker observed 3s before snapshot.
+     - **INFERENCE**: Derived session (`US_REGULAR`), tight bid-ask spread (2.4 bps).
+     - **ASSUMPTION**: Underlying mapping convention (`rAAPL` → Apple Inc.).
+     - **UNKNOWN**: Live US reference tape is explicitly unavailable (no Bitget US tape feed).
+
+4. **Step C: Compose & Challenge a Structured Claim**
+   - In the **Structured Claim Composer**, select:
+     - Kind: `24h price change`
+     - Direction: `down`
+   - Click **`Run challenge`**.
+   - *Observation*: Claim is scored as **`supported`** because the 24h change is negative (-0.43%).
+
+5. **Step D: Revise the Claim and Inspect Thesis Evolution**
+   - Change Direction from `down` to `up`.
+   - Click **`Revise and re-challenge`**.
+   - *Observation*: The assessment switches to **`challenged`** (contradicted by ticker data). The **Thesis Revision History** panel displays the before/after status diff and text change.
+
+6. **Step E: Multi-Symbol Side-by-Side Comparison**
+   - Scroll to the **Multi-Symbol Comparison Desk**.
+   - Click **`Load Demo Comparison (rAAPL vs rNVDA)`**.
+   - *Observation*: Both symbols load side-by-side with independent timestamps (`rAAPL` at regular hours, `rNVDA` overnight). The same claims are scored independently per column:
+     - 24h change `down`: **supported** on rAAPL, **challenged** on rNVDA (+1.20%).
+     - Session `regular`: **supported** on rAAPL, **challenged** on rNVDA (`US_CLOSED`).
+     - Reference tape `divergence`: **unsupported** on both (remains UNKNOWN, not false).
+
+7. **Step F: Export Non-Advisory Audit Report**
+   - In either the single-symbol or comparison panel, click **`Preview report`** or export to **Markdown**, **JSON**, or **HTML**.
+   - *Observation*: The report contains a clear **`DEMO / FIXTURE DATA`** watermark, non-advisory disclaimers (`advisory: false`), preserved scenario timestamps, and zero secret leakage.
+
+---
+
+## Reproducible Demo Scenarios
+
+Mirrorline ships with three deterministic scenarios in `lib/fixtures/scenarios.ts`:
+
+| Scenario ID | Symbol | Market Session | 24h Change | Key Testing Surface |
+| --- | --- | --- | --- | --- |
+| `scenario-raapl-session-down` | **rAAPL** | `US_REGULAR` | -0.43% | Regular trading hours, tight spread (2.4 bps), supported downside claim |
+| `scenario-rnvda-overnight-up` | **rNVDA** | `US_CLOSED` (Overnight) | +1.20% | Overnight session divergence tension against closed underlying US equity |
+| `scenario-rtsla-weekend-stale` | **rTSLA** | `WEEKEND` | +0.35% | 24/7 weekend token tradability, stale ticker flag (>15s), partial book failure |
+
+**Isolation Guarantee**: Requesting an unmapped symbol in Demo Mode returns `404 DEMO_FIXTURE_NOT_FOUND` and never silently falls back to live data.
+
+---
+
+## Clean Launch & Setup
+
+### Requirements
+- **Node.js**: v20 or higher
+- **pnpm**: v9 or higher
+
+### Commands
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Configure environment
+cp .env.example .env.local
+
+# 3. Start development server
+pnpm dev
+# App listens at http://localhost:43123
+
+# 4. Production build
+pnpm build
+pnpm start
+```
+
+### Environment Configuration
+
+Public Bitget market data and Demo Mode require **0 credentials**. Optional keys are only used for whitelist-gated Reality depth:
 
 ```bash
-pnpm install
-cp .env.example .env.local
-pnpm dev
-```
-
-The app listens on [http://localhost:43123](http://localhost:43123).
-
-Public Bitget market data does not require API keys. If you later need Reality order-book depth or fills, add server-only credentials:
-
-```
+# Optional (server-side only; never exposed to browser)
 BITGET_API_KEY=
 BITGET_API_SECRET=
 BITGET_PASSPHRASE=
+
+# Optional tuning
+BITGET_TIMEOUT_MS=10000
+BITGET_BASE_URL=https://api.bitget.com
+NEXT_PUBLIC_APP_URL=http://localhost:43123
 ```
 
-Never expose those values to the browser.
+---
 
-## Verify the integration
+## Architecture & API Routes
+
+### System Overview
+- **Data Layer (`lib/bitget/`)**: Isolated Bitget UTA REST client for tickers, candles, sessions, and order books.
+- **Normalization Layer (`lib/market/`)**: Labels every field as observed, derived, or unavailable. Preserves stale flags and resource failures.
+- **Evidence Layer (`lib/evidence/`)**: Categorizes items into `FACT`, `INFERENCE`, `ASSUMPTION`, and `UNKNOWN`.
+- **Brief Layer (`lib/brief/`)**: Compiles executive summaries, session tensions, and unanswered questions without LLM calls.
+- **Challenge & Revision Engine (`lib/challenge/`, `lib/composer/`, `lib/revision/`)**: Deterministically assesses structured claims and tracks diffs across edits.
+- **Comparison & Reporting (`lib/compare/`, `lib/report/`)**: Formats independent snapshots into Markdown, JSON, and print-ready HTML exports.
+
+### API Routes
+
+#### Demo Fixture Endpoints
+- `GET /api/market/demo/scenarios` — Catalog of deterministic demo scenarios.
+- `GET /api/market/demo/snapshot/[symbol]` — Deterministic frozen snapshot (`rAAPL`, `rNVDA`, `rTSLA`).
+
+#### Live Bitget Endpoints
+- `GET /api/market/verify?symbol=rAAPL` — Live Bitget API health check and endpoint audit.
+- `GET /api/market/instruments?query=nvda&limit=20` — Discovers active Reality rTokens.
+- `GET /api/market/tickers/[symbol]` — Live 24h ticker, price, and volume.
+- `GET /api/market/candles?symbol=rAAPL&interval=1H&limit=48` — Market candlestick bars.
+- `GET /api/market/session?symbol=rAAPL&company=true` — Bitget session windows and company info.
+- `GET /api/market/snapshot/[symbol]` — Full raw and normalized live snapshot.
+- `GET /api/market/evidence/[symbol]` — Classified evidence pack.
+- `GET /api/market/brief/[symbol]` — Non-advisory investigation brief.
+- `POST /api/market/challenge/[symbol]` — Deterministic interpretation challenge.
+- `POST /api/market/revision/[symbol]` — Thesis revision diff analysis.
+- `POST /api/market/composer/[symbol]` — Structured claim composer and challenge.
+- `POST /api/market/report/[symbol]` — Assembles single-symbol report from loaded models.
+- `POST /api/market/compare/report` — Assembles multi-symbol comparison report from loaded models.
+
+---
+
+## Verification & Testing Suite
+
+Run the full verification suite with a single command:
 
 ```bash
+# Run unit & integration tests (18 files, 125 tests)
 pnpm test
-pnpm verify:bitget
-# or
-pnpm verify:bitget rNVDA
-```
 
-HTTP verification route:
+# TypeScript strict type checking
+pnpm exec tsc --noEmit
 
-```
-GET /api/market/verify?symbol=rAAPL
-```
-
-Other server routes:
-
-- `GET /api/market/instruments?query=nvda&limit=20`
-- `GET /api/market/tickers/rAAPL`
-- `GET /api/market/candles?symbol=rAAPL&interval=1H&limit=48`
-- `GET /api/market/session?symbol=rAAPL&company=true`
-- `GET /api/market/snapshot/rAAPL` — raw Bitget payload plus `context`
-- `GET /api/market/context/rAAPL` — normalized context only
-- `GET /api/market/evidence/rAAPL` — investigation evidence pack
-- `GET /api/market/brief/rAAPL` — non-advisory investigation brief
-- `POST /api/market/challenge/rAAPL` — interpretation challenge (`{ thesis, reason?, assumptions? }`)
-- `GET /api/market/challenge/rAAPL?thesis=...` — same challenge via query string
-- `POST /api/market/revision/rAAPL` — thesis revision diff (`{ previous, thesis?, current?, sequence? }`)
-- `POST /api/market/composer/rAAPL` — structured claim challenge (`{ claims, freeText?, reason?, assumptions? }`)
-- `POST /api/market/report/rAAPL` — investigation report from loaded models (`{ pack, brief, challenge?, revisions?, context? }`, `?format=json|markdown|html`)
-- `POST /api/market/compare/report` — multi-symbol comparison report from loaded models (`{ symbols, claims, freeText? }`, `?format=json|markdown|html`)
-- `GET /api/market/demo/scenarios` — list available deterministic demo scenarios
-- `GET /api/market/demo/snapshot/[symbol]` — deterministic frozen snapshot (rAAPL, rNVDA, rTSLA; 404 for others, no live fallback)
-- `GET /api/market/orderbook/rAAPL`
-
-## Architecture
-
-Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`. The interpretation challenge lives in `lib/challenge/`. Thesis revisions live in `lib/revision/`. Structured claims live in `lib/composer/` and render into the existing challenge engine. Investigation reports live in `lib/report/` and only assemble already-loaded models. Multi-symbol comparison lives in `lib/compare/` and scores shared claims against each symbol's own loaded snapshot.
-
-See `docs/BITGET.md` and `ENVIRONMENT.md`.
-
-## Known limitations
-
-- This is not the full multi-agent investigation pipeline and not a trade recommendation.
-- Claim matching is rule-based. Unmapped natural language is unassessed, not labeled false.
-- Missing evidence does not disprove a thesis.
-- Selecting a structured claim type does not make the assertion a verified fact.
-- Export does not refresh Bitget. Report creation time is labeled separately from evidence timestamps.
-- Comparison columns are independent snapshots. The same claim can be supported on one symbol and unsupported on another.
-- Intraday or unspecified price direction is unassessed because the pack only classifies 24-hour change.
-- Reality-specific order book and platform fills require Bitget API credentials and may still need UID whitelist access.
-- Bitget session endpoints return schedules; current session is an inference from those schedules plus the calendar.
-- Company overview is Bitget metadata, not a live US exchange tape. It is never used as `referencePrice`.
-- Public UTA book depth is not Reality 40-level depth.
-- No database, auth, news feed, or trade execution.
-
-## Tests
-
-```bash
-pnpm test
+# ESLint code style and quality check
 pnpm lint
-pnpm build
+
+# Live Bitget API verification audit
+pnpm verify:bitget
+
+# Browser QA automated walkthrough
+node scripts/milestone11-walkthrough.mjs
 ```
+
+---
+
+## Security, Privacy, and Trust Safeguards
+
+1. **Strictly Non-Advisory**: Every report, screen, and serializer explicitly embeds `advisory: false` and disclaimer notices.
+2. **Credential Redaction**: Serializers inspect and redact any sensitive keys (`apiKey`, `secret`, `passphrase`, `token`) prior to export.
+3. **HTML Sanitization**: All user-authored thesis inputs are escaped to prevent XSS.
+4. **No Hidden Refreshes**: Report export functions assemble only in-memory, loaded snapshots. They never make background network calls.
+5. **Timestamp Fidelity**: Each column in a multi-symbol comparison retains its own retrieval time. No shared observation time is fabricated.
+
+---
+
+## Known Limitations
+
+- **No Live US Composite Tape**: Bitget does not provide consolidated US equity exchange data. Reference price and divergence remain classified as `UNKNOWN`.
+- **Reality 40-level Book Depth**: Reality depth is whitelist-gated by Bitget BD; public UTA book depth is labeled as top-15 public order book.
+- **Rule-Based Claim Matching**: Unmapped natural language statements are marked `unassessed`, not false.
+- **Zero Execution**: No order placement, wallet keys, automated rebalancing, or trade execution.

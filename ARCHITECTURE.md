@@ -1,39 +1,69 @@
-# Architecture
+# Mirrorline Architecture
 
-Milestone 11 introduces **Hackathon Demo Readiness & Reproducible Demo Mode**, adding deterministic fixture scenarios, first-time user orientation, and unmistakable demo labeling while keeping live Bitget mode completely isolated.
+Mirrorline is an evidence-first, non-advisory AI trading desk purpose-built for stress-testing trader decisions in 24/7 Bitget Reality rToken markets.
 
 ```
-Browser
-  → Next.js route handlers in app/api/market
-    ├── /api/market/demo/* (deterministic fixtures)
-    │     → lib/fixtures (frozen scenarios: rAAPL, rNVDA, rTSLA)
-    │         → lib/market/normalize (with isDemoFixture: true)
-    │             → lib/evidence (labeled packs)
-    │                 → lib/brief (labeled briefs)
-    └── /api/market/* (live data)
-          → lib/compare (multi-symbol comparison)
-            → lib/report (per-symbol report assembly + sanitization)
-            → lib/composer (shared structured claims)
-            → lib/challenge
-              → lib/brief
-                → lib/evidence
-                  → lib/market
-                    → lib/bitget
-                      → https://api.bitget.com
+Browser (Next.js Client Components)
+  ├── components/data-foundation-desk.tsx (Master Desk Controller)
+  ├── components/first-time-orientation.tsx (Judge Guide & Evidence Principles)
+  ├── components/structured-claim-composer.tsx (Formal Claim Builder)
+  ├── components/interpretation-challenge-panel.tsx (Deterministic Scoring & Revision Loop)
+  ├── components/multi-symbol-comparison-panel.tsx (Independent Column Comparison)
+  └── components/investigation-report-panel.tsx (Audit Export: MD, JSON, HTML, Print)
+        │
+        ▼ (HTTP REST API Routes in app/api/market)
+  ┌───────────────────────────────────────────────┬───────────────────────────────────────────────┐
+  │ DEMO FIXTURE ROUTE DOMAIN (Isolated / Frozen) │ LIVE BITGET DATA ROUTE DOMAIN (Real-time UTA) │
+  │ • /api/market/demo/scenarios                  │ • /api/market/verify                          │
+  │ • /api/market/demo/snapshot/[symbol]          │ • /api/market/snapshot/[symbol]               │
+  │   └── lib/fixtures/                           │ • /api/market/instruments                     │
+  │       (rAAPL, rNVDA, rTSLA deterministic data)│ • /api/market/tickers/[symbol]                │
+  │                                               │ • /api/market/candles                         │
+  │                                               │ • /api/market/session                         │
+  │                                               │ • /api/market/orderbook/[symbol]              │
+  └───────────────────────┬───────────────────────┴───────────────────────┬───────────────────────┘
+                          │                                               │
+                          ▼                                               ▼
+              lib/market/normalize.ts                        lib/bitget/ (Isolated Client)
+              (Labels Observed, Derived, Unavailable)        (Direct HTTP to https://api.bitget.com)
+                          │
+                          ▼
+              lib/evidence/pack.ts
+              (Classifies FACT, INFERENCE, ASSUMPTION, UNKNOWN)
+                          │
+                          ▼
+              lib/brief/generate.ts
+              (Composes Non-Advisory Brief & Surfaces Structural Tensions)
+                          │
+                          ▼
+              lib/challenge/engine.ts + lib/composer/
+              (Scores Claims: supported, challenged, unsupported, unassessed)
+                          │
+                          ▼
+              lib/revision/diff.ts
+              (Tracks Thesis Evolution Across Edits)
+                          │
+                          ▼
+              lib/compare/ & lib/report/
+              (Assembles Independent Exports with Frozen vs Live Timestamp Integrity)
 ```
 
-Snapshot loads stay explicit user actions. Demo mode does not query Bitget or fall back to live data. Live mode never silently substitutes fixtures.
+## Architectural Design Principles
 
-## Layout
+1. **Evidence-First, Non-Advisory Guarantee**
+   - Mirrorline **never** issues buy/sell recommendations, forecasts target prices, or computes trade sizing.
+   - A `supported` claim means only that the assertion matches the loaded evidence snapshot — **not** that it is a profitable trade thesis.
 
-- `lib/fixtures/types.ts` — DemoScenario, DemoScenarioSummary, and DemoRecommendedClaim models
-- `lib/fixtures/scenarios.ts` — Deterministic scenario definitions with frozen timestamps and preserved stale/failure states:
-  - `rAAPL`: Thursday regular session downside (-0.43%), tight spread, fresh ticker (3s old).
-  - `rNVDA`: Thursday overnight session upside (+1.20%), wider spread, session divergence tension against closed US equity.
-  - `rTSLA`: Saturday weekend session, stale ticker (48s old vs 15s limit), and partial book failure resilience.
-- `lib/fixtures/index.ts` — Scenario catalog matching, snapshot generation, and supported demo symbols.
-- `app/api/market/demo/scenarios/route.ts` — GET catalog route.
-- `app/api/market/demo/snapshot/[symbol]/route.ts` — GET deterministic frozen snapshot route (404 with no fallback for unmapped symbols).
-- `components/first-time-orientation.tsx` — Product-specific orientation card explaining what Mirrorline does and deliberately does not do, evidence classifications (**FACT**, **INFERENCE**, **ASSUMPTION**, **UNKNOWN**), and assessment statuses (supported by evidence only, not proof of a profitable trading outcome).
-- `lib/report/` & `lib/compare/` — HTML, Markdown, and JSON serializers with prominent `DEMO / FIXTURE DATA` banners and disclaimers when `isDemoFixture: true`.
-- `components/multi-symbol-comparison-panel.tsx` — Multi-symbol comparison desk with fixture mode toggle, 1-click demo pair loader (`rAAPL vs rNVDA`), per-column fixture tags, and live claim recomputation.
+2. **Strict Mode Isolation**
+   - **Demo Mode**: Serviced by `/api/market/demo/*` with frozen snapshots in `lib/fixtures/`. Demo mode **never** falls back to live Bitget APIs. If an unsupported symbol is requested, an explicit `404 DEMO_FIXTURE_NOT_FOUND` error is returned.
+   - **Live Mode**: Directly queries public Bitget UTA REST endpoints via `lib/bitget/`. Live mode **never** injects synthetic fixture data.
+
+3. **Explicit Unknowns & No Data Fabrication**
+   - Bitget public APIs do not provide a live underlying US equity tape or composite reference prices. Mirrorline labels `referencePrice` as `unavailable` / `unverified` and classifies it as `UNKNOWN`.
+   - Missing data does **not** disprove a thesis. It is retained as `unsupported` or `UNKNOWN`, never synthesized.
+
+4. **Snapshot Independence in Comparison**
+   - In multi-symbol comparisons, each rToken retains its own snapshot ID, `retrievedAt` timestamp, and freshness state. Mirrorline never implies a shared observation time.
+
+5. **Deterministic Auditability**
+   - Every claim assessment, brief paragraph, and tension is linked back to explicit evidence IDs, source endpoints, fields, and observation timestamps.
