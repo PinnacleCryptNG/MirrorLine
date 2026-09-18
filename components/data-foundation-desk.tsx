@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { MarketContextPanel } from "@/components/market-context-panel";
+import { EvidencePackPanel } from "@/components/evidence-pack-panel";
+import { buildEvidencePack } from "@/lib/evidence/pack";
 import type { MarketContext, MarketSnapshotPayload, ResourceFailure } from "@/lib/market/types";
 
 export type CheckStatus = "pass" | "fail" | "skipped";
@@ -122,6 +124,7 @@ export function DataFoundationDesk({
 
   const context = snapshotContext(snapshot);
   const failures = snapshotFailures(snapshot);
+  const pack = useMemo(() => (context ? buildEvidencePack(context) : null), [context]);
   const last = context?.price.last;
   const change = context?.price.change24hPercent;
   const session = context?.session.marketSession;
@@ -136,12 +139,11 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 2</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Market Context Layer</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 3</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Evidence Pack</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Session-aware Bitget Reality context for investigations. Every field is labeled observed, derived, or
-            unavailable. Stale and missing values stay visible. This screen does not trade, and it does not invent a
-            US tape, reference price, or Reality 40-level depth.
+            Traceable FACT / INFERENCE / ASSUMPTION / UNKNOWN evidence from Bitget Reality context. Missing, stale, and
+            unverified items stay visible. This screen does not trade, invent a US tape, or treat assumptions as facts.
           </p>
         </div>
         <form
@@ -214,6 +216,8 @@ export function DataFoundationDesk({
           </button>
         ))}
       </section>
+
+      <EvidencePackPanel pack={pack} />
 
       <MarketContextPanel context={context} failures={failures} />
 

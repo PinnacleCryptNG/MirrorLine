@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 2 public market context
+## Required for Milestone 3 public evidence packs
 
-None. Reality rToken discovery, tickers, candles, stock info, session states, calendar, and the normalized context layer use public Bitget UTA endpoints.
+None. Evidence packs are generated from the public Bitget market context layer.
 
 ## Optional
 

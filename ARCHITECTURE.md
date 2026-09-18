@@ -1,32 +1,25 @@
 # Architecture
 
-Milestone 2 sits on the Milestone 1 Bitget client. The client still talks to Bitget; the context layer only normalizes what that client already returns.
+Milestone 3 sits on the Milestone 2 market context layer. Context still normalizes Bitget payloads; the evidence pack only classifies those fields.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/market (normalize, freshness, spread, gather)
-      → lib/bitget
-        → https://api.bitget.com
+    → lib/evidence (FACT / INFERENCE / ASSUMPTION / UNKNOWN pack)
+      → lib/market (normalize, freshness, spread, gather)
+        → lib/bitget
+          → https://api.bitget.com
 ```
 
-No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented.
+No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented. The pack is not a multi-agent investigation pipeline.
 
 ## Layout
 
-- `lib/bitget/client.ts` — HTTP client, timeouts, envelope parsing, optional HMAC signing
-- `lib/bitget/assets.ts` — rToken discovery
-- `lib/bitget/market.ts` — tickers
-- `lib/bitget/history.ts` — candles
-- `lib/bitget/session.ts` — stock info, session windows, calendar, derived current session
-- `lib/bitget/orderbook.ts` — optional public and Reality depth
-- `lib/bitget/verify.ts` — integration report used by the HTTP route and CLI script
-- `lib/market/fields.ts` — observed / derived / unavailable field helpers
-- `lib/market/spread.ts` — ask − bid and basis-point spread
-- `lib/market/freshness.ts` — ticker and candle staleness
-- `lib/market/normalize.ts` — pure snapshot → context mapping
-- `lib/market/context.ts` — gather existing Bitget getters with partial failure
+- `lib/bitget/` — typed Bitget Reality client (Milestone 1)
+- `lib/market/` — labeled market context (Milestone 2)
+- `lib/evidence/types.ts` — evidence item and pack schema
+- `lib/evidence/pack.ts` — pure generator over `MarketContext`
+- `lib/evidence/get-pack.ts` — gathers context once, then builds the pack
+- `app/api/market/evidence/[symbol]/route.ts` — HTTP surface
 
-Failed Bitget resources become `unavailable` fields with `error` or `missing` status. The layer does not invent a US tape, reference price, or Reality 40-level depth.
-
-Later milestones add investigation, evidence, and decision engines on top of this context.
+Failed or missing Bitget resources become UNKNOWN evidence items. Inferences must cite supporting facts. Assumptions are never classified as facts. No US tape, news, or Reality 40-level depth is invented.

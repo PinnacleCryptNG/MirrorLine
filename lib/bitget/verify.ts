@@ -16,6 +16,7 @@ import { isBitgetError } from "@/lib/bitget/errors";
 import { normalizeRTokenSymbol } from "@/lib/bitget/symbols";
 import { REALITY_CANDLE_INTERVALS } from "@/lib/bitget/types";
 import { getMarketSnapshot } from "@/lib/market/context";
+import { buildEvidencePack } from "@/lib/evidence/pack";
 
 export interface VerificationCheck {
   id: string;
@@ -326,11 +327,57 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         failures: ctx.failures,
       },
     });
+
+    const pack = buildEvidencePack(ctx);
+    const referenceItem = pack.items.find((item) => item.id === "reference.price");
+    const divergenceItem = pack.items.find((item) => item.id === "reference.divergence");
+    const newsItem = pack.items.find((item) => item.id === "news.context");
+    const inferences = pack.items.filter((item) => item.classification === "INFERENCE");
+    const assumptionsAsFacts = pack.items.filter(
+      (item) => item.classification === "FACT" && /symbol-convention|pair name/i.test(item.reasoning),
+    );
+    const fabricated = pack.items.filter((item) =>
+      /US tape print|NYSE print|NASDAQ print|breaking news|Reality 40-level depth is available/i.test(item.claim),
+    );
+    const inferencesTraced = inferences.every((item) => item.supports.length > 0 && item.reasoning.length > 0);
+    const honest =
+      referenceItem?.classification === "UNKNOWN" &&
+      divergenceItem?.classification === "UNKNOWN" &&
+      newsItem?.classification === "UNKNOWN" &&
+      inferencesTraced &&
+      assumptionsAsFacts.length === 0 &&
+      fabricated.length === 0;
+    checks.push({
+      id: "evidence-pack",
+      title: "Build an investigation evidence pack (FACT / INFERENCE / ASSUMPTION / UNKNOWN)",
+      endpoint: `composed context → GET /api/market/evidence/${symbolInput}`,
+      access: "public",
+      status: honest ? "pass" : "fail",
+      detail: honest
+        ? `Pack has ${pack.summary.fact} FACT, ${pack.summary.inference} INFERENCE, ${pack.summary.assumption} ASSUMPTION, ${pack.summary.unknown} UNKNOWN. referencePrice and divergence remain UNKNOWN. News is UNKNOWN. Inferences cite supporting items.`
+        : "Evidence pack made an unsupported claim (reference price, news, untraced inference, or assumption presented as fact).",
+      sample: {
+        summary: pack.summary,
+        question: pack.investigation.question,
+        unknowns: pack.unknowns,
+        referencePrice: referenceItem,
+        divergence: divergenceItem,
+        itemIds: pack.items.map((item) => item.id),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
       title: "Normalize market context (observed / derived / unavailable)",
       endpoint: `composed snapshot → GET /api/market/context/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
+    checks.push({
+      id: "evidence-pack",
+      title: "Build an investigation evidence pack (FACT / INFERENCE / ASSUMPTION / UNKNOWN)",
+      endpoint: `composed context → GET /api/market/evidence/${symbolInput}`,
       access: "public",
       status: "fail",
       detail: failureDetail(error),
@@ -343,7 +390,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "2-market-context-layer",
+    milestone: "3-investigation-evidence-pack",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -356,7 +403,8 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Reality-specific order book and platform fills remain optional until a whitelisted API key is configured.",
       "No trading or order-execution endpoints are implemented.",
       "Market context labels every field as observed, derived, or unavailable. Stale and missing data stay explicit.",
-      "No US tape is used. referencePrice and divergence remain unverified.",
+      "Evidence packs classify Bitget context as FACT, INFERENCE, ASSUMPTION, or UNKNOWN. Assumptions are not facts.",
+      "No US tape is used. referencePrice, divergence, and news remain UNKNOWN.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

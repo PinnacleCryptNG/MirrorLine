@@ -62,6 +62,17 @@ Bitget currently labels those windows `EST` with `daylightType=standard` even in
 
 Ticker last prices older than 15s (vs source timestamp) are `stale`. Candle series older than 2× the requested interval are `stale`. Missing timestamps are `unknown`, not silently treated as fresh or stale.
 
+## Investigation evidence pack (Milestone 3)
+
+`lib/evidence/pack.ts` turns a `MarketContext` into classified evidence items:
+
+- **FACT** — a Bitget field as returned (price, windows, candle OHLC)
+- **INFERENCE** — a conclusion with supporting fact IDs (spread, current session, last bar close vs open)
+- **ASSUMPTION** — a convention used only when Bitget omitted a verified field (underlying from pair name)
+- **UNKNOWN** — an unanswered question (US tape, divergence, news, Reality 40-level depth, failed resources)
+
+Each item carries source endpoint/field, timestamps, freshness, reasoning, and caveats. Confidence is omitted for UNKNOWN items.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders
