@@ -28,10 +28,10 @@ export function FirstTimeOrientation({
           </span>
           <div>
             <h2 id="orientation-heading" className="text-sm font-semibold tracking-wide text-[#F5F7FA]">
-              Orientation & Evidence Principles
+              Judge Guide & Evidence Principles
             </h2>
             <p className="text-xs text-[#9BA3B2]">
-              Non-advisory decision support for 24/7 Bitget Reality rTokens.
+              Bitget AI Hackathon Genesis Season 2 · Non-advisory decision support for 24/7 Reality rTokens.
             </p>
           </div>
         </div>
@@ -208,6 +208,90 @@ export function FirstTimeOrientation({
                 <p className="mt-1 text-[#9BA3B2]">Score across symbols or export non-advisory JSON/MD/HTML.</p>
               </div>
             </div>
+          </div>
+
+          {/* Section 4: 3-5 Minute Quick Judge Walkthrough */}
+          <div className="rounded-lg border border-[#8B7CFF]/30 bg-[#8B7CFF]/5 p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="font-semibold text-[#8B7CFF] uppercase tracking-wide text-[11px]">
+                  3–5 Minute Judge Walkthrough
+                </h3>
+                <p className="mt-0.5 text-xs text-[#9BA3B2]">
+                  Fast, reproducible evaluation path using deterministic demo fixtures. Requires 0 API keys and does not rely on live market movements.
+                </p>
+              </div>
+              <span className="rounded border border-[#8B7CFF]/40 bg-[#8B7CFF]/10 px-2 py-0.5 font-data text-[10px] text-[#8B7CFF]">
+                EVALUATOR PATH
+              </span>
+            </div>
+            <ol className="mt-3 space-y-2 text-xs text-[#9BA3B2]">
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  A
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Load a demo scenario:</strong> Click{" "}
+                  <code className="text-[#F4C95D]">rAAPL · Regular Session Down</code> below or switch to{" "}
+                  <code className="text-[#F4C95D]">◆ Demo Fixture Mode</code> in the header. Notice the prominent amber{" "}
+                  <code className="text-[#F4C95D]">DEMO / FIXTURE DATA</code> banner and preserved timestamp.
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  B
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Inspect evidence classification:</strong> Scroll to the{" "}
+                  <em className="text-[#F5F7FA]">Evidence Pack</em> and <em className="text-[#F5F7FA]">Investigation Brief</em>. Observe{" "}
+                  <span className="text-[#5EA7FF]">FACT</span> (direct ticker fields),{" "}
+                  <span className="text-[#8B7CFF]">INFERENCE</span> (derived session & spread),{" "}
+                  <span className="text-[#F4C95D]">ASSUMPTION</span> (mapping conventions), and{" "}
+                  <span className="text-[#9BA3B2]">UNKNOWN</span> (unavailable US tape & news).
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  C
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Compose and challenge a structured claim:</strong> In the{" "}
+                  <em className="text-[#F5F7FA]">Structured Claim Composer</em>, select{" "}
+                  <code className="text-[#8B7CFF]">24h price change</code> is <code className="text-[#8B7CFF]">down</code> and run the challenge. Observe it is marked{" "}
+                  <span className="text-[#36D399]">supported</span> because the 24h change is -0.43%.
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  D
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Revise the claim:</strong> Change direction from <code className="text-[#8B7CFF]">down</code> to <code className="text-[#8B7CFF]">up</code> and click{" "}
+                  <em className="text-[#F5F7FA]">Revise and re-challenge</em>. Observe that the claim is now{" "}
+                  <span className="text-[#FF6B7A]">challenged</span> and a revision diff is recorded in the history panel.
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  E
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Multi-symbol comparison:</strong> In the{" "}
+                  <em className="text-[#F5F7FA]">Multi-Symbol Comparison Desk</em>, click{" "}
+                  <code className="text-[#8B7CFF]">Load Demo Comparison (rAAPL vs rNVDA)</code>. Observe the side-by-side comparison table where independent timestamps are preserved per column with explicit fixture tags.
+                </div>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8B7CFF]/20 font-data text-[11px] font-bold text-[#8B7CFF]">
+                  F
+                </span>
+                <div>
+                  <strong className="text-[#F5F7FA]">Export non-advisory report:</strong> Click{" "}
+                  <em className="text-[#F5F7FA]">Preview report</em> or export to Markdown/HTML/JSON. Confirm the report includes the unmistakable{" "}
+                  <code className="text-[#F4C95D]">DEMO / FIXTURE DATA</code> disclaimer and preserved snapshot timestamps.
+                </div>
+              </li>
+            </ol>
           </div>
 
           {/* Section 4: Quick Demo Scenarios */}

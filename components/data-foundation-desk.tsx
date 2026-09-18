@@ -215,17 +215,17 @@ export function DataFoundationDesk({
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 11</p>
+            <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · BITGET AI HACKATHON GENESIS S2</p>
             {isDemoMode ? (
               <span className="rounded-full border border-[#F4C95D]/40 bg-[#F4C95D]/10 px-2 py-0.5 font-data text-[10px] text-[#F4C95D]">
                 FIXTURE MODE
               </span>
             ) : null}
           </div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Hackathon Demo & Investigation Desk</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Evidence-First AI Trading Desk</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Evidence-first, non-advisory investigation desk for 24/7 Bitget Reality rTokens. Features reproducible demo
-            fixtures with preserved timestamps and live market verification.
+            Evidence-first, non-advisory investigation desk for 24/7 Bitget Reality rTokens. Stress-test trading interpretations
+            against loaded Bitget market context with reproducible demo fixtures and live market verification.
           </p>
         </div>
         <div className="flex flex-col gap-2">

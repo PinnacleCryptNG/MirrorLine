@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Hackathon Demo & Investigation Desk",
+  title: "Mirrorline · Evidence-First AI Trading Desk (Bitget Hackathon)",
   description:
-    "Milestone 11 of Mirrorline: reproducible demo mode, first-time user orientation, and hardened multi-symbol evidence comparison desk for Bitget Reality rTokens. Non-advisory.",
+    "Bitget AI Hackathon Genesis Season 2 Submission: Evidence-first, non-advisory decision support for 24/7 Bitget Reality rTokens. Reproducible demo mode, structured claims, revision diffs, and multi-symbol comparison.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
