@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { MarketContextPanel } from "@/components/market-context-panel";
 import { EvidencePackPanel } from "@/components/evidence-pack-panel";
 import { InvestigationBriefPanel } from "@/components/investigation-brief-panel";
+import { InterpretationChallengePanel } from "@/components/interpretation-challenge-panel";
 import { buildEvidencePack } from "@/lib/evidence/pack";
 import { buildInvestigationBrief } from "@/lib/brief/generate";
 import type { MarketContext, MarketSnapshotPayload, ResourceFailure } from "@/lib/market/types";
@@ -142,12 +143,12 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 4</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Brief</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 5</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Interpretation Challenge</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            A non-advisory brief over Bitget Reality evidence: what is observed, inferred, assumed, unknown, and in
-            tension. Citation chips jump to the supporting evidence item. This screen does not trade or invent a US
-            tape.
+            Submit an initial reading of an rToken move and get a structured, evidence-grounded challenge. Claims are
+            supported, challenged, unsupported, or unassessed against the investigation brief. This desk does not
+            trade, predict, or invent a US tape.
           </p>
         </div>
         <form
@@ -220,6 +221,13 @@ export function DataFoundationDesk({
           </button>
         ))}
       </section>
+
+      <InterpretationChallengePanel
+        key={`${symbol}-${brief?.retrievedAt ?? "none"}`}
+        symbol={pack?.investigation.tokenSymbol ?? symbol}
+        pack={pack}
+        brief={brief}
+      />
 
       <InvestigationBriefPanel brief={brief} />
 

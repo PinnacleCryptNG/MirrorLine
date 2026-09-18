@@ -19,6 +19,7 @@ import { getMarketSnapshot } from "@/lib/market/context";
 import { buildEvidencePack } from "@/lib/evidence/pack";
 import { buildInvestigationBrief } from "@/lib/brief/generate";
 import { TENSION_IDS } from "@/lib/brief/types";
+import { buildInterpretationChallenge } from "@/lib/challenge/engine";
 
 export interface VerificationCheck {
   id: string;
@@ -413,6 +414,71 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         cited: Object.keys(brief.citations),
       },
     });
+
+    const challenge = buildInterpretationChallenge({
+      pack,
+      brief,
+      input: {
+        thesis: `${pack.investigation.tokenSymbol} fell because of earnings news and is cheap versus the US stock. Buy it. The moon phase confirms the move.`,
+        reason: "The public book is liquid Reality depth.",
+        assumptions: ["The last print is current."],
+      },
+    });
+    const challengeKnown = new Set(pack.items.map((entry) => entry.id));
+    const challengeIds = [
+      ...challenge.assessments.flatMap((entry) => entry.evidenceIds),
+      ...challenge.whatAmIMissing.flatMap((entry) => entry.evidenceIds),
+      ...challenge.attackMyThesis.flatMap((entry) => entry.evidenceIds),
+    ];
+    const challengeTraceable = challengeIds.every((id) => challengeKnown.has(id));
+    const generated = JSON.stringify({
+      assessments: challenge.assessments.map((entry) => ({
+        kind: entry.kind,
+        status: entry.status,
+        reasoning: entry.reasoning,
+      })),
+      attack: challenge.attackMyThesis.map((entry) => ({ title: entry.title, text: entry.text })),
+    });
+    const fabricatedChallenge = /NYSE print showed|NASDAQ print of|Bloomberg reports|Reuters reports|should buy|should sell|buy this|sell this|price will|price target/i.test(
+      generated,
+    );
+    const causation = challenge.assessments.find((entry) => entry.kind === "causation");
+    const tape = challenge.assessments.find((entry) => entry.kind === "reference.tape");
+    const trade = challenge.assessments.find((entry) => entry.kind === "trade.action");
+    const unmatched = challenge.assessments.find((entry) => /moon phase/i.test(entry.text));
+    const direction = challenge.assessments.find((entry) => entry.kind === "price.direction");
+    const challengeHonest =
+      challenge.advisory === false &&
+      challenge.milestone === "5-interpretation-challenge" &&
+      challengeTraceable &&
+      !fabricatedChallenge &&
+      causation?.status === "unsupported" &&
+      tape?.status === "unsupported" &&
+      trade?.status === "unassessed" &&
+      unmatched?.status === "unassessed" &&
+      direction !== undefined &&
+      direction.status !== "unassessed" &&
+      challenge.attackMyThesis.every((point) => point.invented === false) &&
+      challenge.whatAmIMissing.some((entry) => entry.kind === "unknown");
+    checks.push({
+      id: "interpretation-challenge",
+      title: "Challenge a thesis against the investigation brief",
+      endpoint: `composed brief → POST /api/market/challenge/${symbolInput}`,
+      access: "public",
+      status: challengeHonest ? "pass" : "fail",
+      detail: challengeHonest
+        ? `Challenge ${challenge.summary.supported} supported / ${challenge.summary.challenged} challenged / ${challenge.summary.unsupported} unsupported / ${challenge.summary.unassessed} unassessed. Causation and tape stay unsupported. Trade language is unassessed. Citations resolve to pack IDs.`
+        : "Challenge lost traceability, treated missing evidence as false, invented counterclaims, or emitted a recommendation.",
+      sample: {
+        summary: challenge.summary,
+        statuses: challenge.assessments.map((entry) => ({
+          kind: entry.kind,
+          status: entry.status,
+          ruleId: entry.ruleId,
+        })),
+        attackIds: challenge.attackMyThesis.map((entry) => entry.id),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -438,6 +504,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "interpretation-challenge",
+      title: "Challenge a thesis against the investigation brief",
+      endpoint: `composed brief → POST /api/market/challenge/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -446,7 +520,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "4-investigation-brief",
+    milestone: "5-interpretation-challenge",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -461,6 +535,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Market context labels every field as observed, derived, or unavailable. Stale and missing data stay explicit.",
       "Evidence packs classify Bitget context as FACT, INFERENCE, ASSUMPTION, or UNKNOWN. Assumptions are not facts.",
       "Investigation briefs are non-advisory. Tensions cite evidence IDs; overnight rToken quoting vs closed US equity is a tension, not a contradiction.",
+      "Interpretation challenges match thesis claims with transparent rules. Unmapped language is unassessed, not false. Missing evidence does not disprove a thesis.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

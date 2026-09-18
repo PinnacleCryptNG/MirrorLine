@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 4 public investigation briefs
+## Required for Milestone 5 public interpretation challenges
 
-None. Briefs are composed from the public evidence pack. No LLM key is required.
+None. Challenges are composed from the public investigation brief. No LLM key is required.
 
 ## Optional
 

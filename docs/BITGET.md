@@ -81,6 +81,14 @@ Tensions cite evidence IDs. Overnight rToken quoting versus a closed US equity s
 
 UNKNOWN remains an unanswered question, not a negative finding.
 
+## Interpretation challenge (Milestone 5)
+
+`lib/challenge/engine.ts` turns a trader thesis plus the existing pack and brief into a non-advisory challenge. It does not call Bitget or an LLM.
+
+Claims are split into sentences and matched with exported `CLAIM_RULES` (direction, last price, US session, causation, news, tape, liquidity, Reality depth, freshness, trade action, named underlying). Unmapped language is **unassessed**, not false. Missing evidence is **unsupported**, not disproof. Attack points only restate pack evidence and brief tensions.
+
+`POST /api/market/challenge/{symbol}` accepts `{ thesis, reason?, assumptions? }`.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders
