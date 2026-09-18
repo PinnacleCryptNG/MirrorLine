@@ -610,7 +610,7 @@ function buildTraderAssumptions(
     };
   });
 
-  const implied: Array<{ text: string; kinds: ClaimKind[] }> = [
+  const implied: Array<{ text: string; kinds: ClaimKind[]; requireStatus?: ClaimAssessment["status"] }> = [
     {
       text: "A Bitget 24-hour change can be read as a reason price moved.",
       kinds: ["causation"],
@@ -626,13 +626,20 @@ function buildTraderAssumptions(
     {
       text: "A stale last price can still be treated as the current print.",
       kinds: ["freshness.current"],
+      requireStatus: "challenged",
     },
   ];
 
   for (const [index, entry] of implied.entries()) {
-    const related = assessments.filter(
-      (assessment) => assessment.kind && entry.kinds.includes(assessment.kind) && assessment.status !== "unassessed",
-    );
+    const related = assessments.filter((assessment) => {
+      if (!assessment.kind || !entry.kinds.includes(assessment.kind) || assessment.status === "unassessed") {
+        return false;
+      }
+      if (entry.requireStatus && assessment.status !== entry.requireStatus) {
+        return false;
+      }
+      return true;
+    });
     if (related.length === 0) {
       continue;
     }
