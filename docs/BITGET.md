@@ -73,6 +73,14 @@ Ticker last prices older than 15s (vs source timestamp) are `stale`. Candle seri
 
 Each item carries source endpoint/field, timestamps, freshness, reasoning, and caveats. Confidence is omitted for UNKNOWN items.
 
+## Investigation brief (Milestone 4)
+
+`lib/brief/generate.ts` turns an `EvidencePack` into a non-advisory brief. It does not call Bitget or an LLM.
+
+Tensions cite evidence IDs. Overnight rToken quoting versus a closed US equity session is a **tension** (interpretation risk), not a contradiction. A contradiction is reserved for actual field conflicts such as bid above ask.
+
+UNKNOWN remains an unanswered question, not a negative finding.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

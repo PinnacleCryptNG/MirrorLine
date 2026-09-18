@@ -1,25 +1,28 @@
 # Architecture
 
-Milestone 3 sits on the Milestone 2 market context layer. Context still normalizes Bitget payloads; the evidence pack only classifies those fields.
+Milestone 4 sits on the Milestone 3 evidence pack. The brief generator does not call Bitget and does not reclassify fields; it only composes a non-advisory document from pack items.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/evidence (FACT / INFERENCE / ASSUMPTION / UNKNOWN pack)
-      → lib/market (normalize, freshness, spread, gather)
-        → lib/bitget
-          → https://api.bitget.com
+    → lib/brief (investigation brief, tensions)
+      → lib/evidence (FACT / INFERENCE / ASSUMPTION / UNKNOWN pack)
+        → lib/market
+          → lib/bitget
+            → https://api.bitget.com
 ```
 
-No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented. The pack is not a multi-agent investigation pipeline.
+No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented. The brief is deterministic (no LLM) and is not a multi-agent pipeline.
 
 ## Layout
 
 - `lib/bitget/` — typed Bitget Reality client (Milestone 1)
 - `lib/market/` — labeled market context (Milestone 2)
-- `lib/evidence/types.ts` — evidence item and pack schema
-- `lib/evidence/pack.ts` — pure generator over `MarketContext`
-- `lib/evidence/get-pack.ts` — gathers context once, then builds the pack
-- `app/api/market/evidence/[symbol]/route.ts` — HTTP surface
+- `lib/evidence/` — classified evidence pack (Milestone 3)
+- `lib/brief/types.ts` — investigation brief schema
+- `lib/brief/tensions.ts` — tension vs contradiction detector
+- `lib/brief/generate.ts` — pure pack → brief mapping
+- `lib/brief/get-brief.ts` — gathers evidence once, then builds the brief
+- `app/api/market/brief/[symbol]/route.ts` — HTTP surface
 
-Failed or missing Bitget resources become UNKNOWN evidence items. Inferences must cite supporting facts. Assumptions are never classified as facts. No US tape, news, or Reality 40-level depth is invented.
+Every brief paragraph cites evidence IDs. Overnight rToken quoting vs a closed US equity session is a tension, not a contradiction. UNKNOWN stays an unanswered question.

@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 3 public evidence packs
+## Required for Milestone 4 public investigation briefs
 
-None. Evidence packs are generated from the public Bitget market context layer.
+None. Briefs are composed from the public evidence pack. No LLM key is required.
 
 ## Optional
 

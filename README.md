@@ -2,7 +2,7 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 3 — Investigation Evidence Pack** for the Bitget AI × Crypto Hackathon Genesis Season 2, built on the Bitget data foundation and market context layer.
+This repository currently ships **Milestone 4 — Investigation Brief** for the Bitget AI × Crypto Hackathon Genesis Season 2, built on the Bitget data foundation, market context layer, and evidence pack.
 
 It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
@@ -11,6 +11,8 @@ It does not tell anyone what to buy or sell. It does not place orders. It does n
 - Discover Reality rToken instruments and retrieve Bitget ticker, candles, session, and stock metadata
 - Normalize a market context that labels every field observed, derived, or unavailable
 - Build a per-investigation **evidence pack** that classifies claims as **FACT**, **INFERENCE**, **ASSUMPTION**, or **UNKNOWN**
+- Compose a deterministic, non-advisory **investigation brief** with session context, tensions, and explicit unknowns
+- Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
 - Trace each item to a Bitget source field, timestamp, and freshness window
 - Keep missing, stale, failed, and unverified data as explicit UNKNOWN or stale FACT items
 - Leave reference price, divergence, news, and Reality 40-level depth unanswered unless Bitget actually returns them
@@ -60,17 +62,18 @@ Other server routes:
 - `GET /api/market/snapshot/rAAPL` — raw Bitget payload plus `context`
 - `GET /api/market/context/rAAPL` — normalized context only
 - `GET /api/market/evidence/rAAPL` — investigation evidence pack
+- `GET /api/market/brief/rAAPL` — non-advisory investigation brief
 - `GET /api/market/orderbook/rAAPL`
 
 ## Architecture
 
-Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/` and only consumes `MarketContext`. Next.js route handlers in `app/api/market/` are the only HTTP surface.
+Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`.
 
 See `docs/BITGET.md` and `ENVIRONMENT.md`.
 
 ## Known limitations
 
-- This is not the full multi-agent investigation pipeline.
+- This is not the full multi-agent investigation pipeline and not a trade recommendation.
 - Reality-specific order book and platform fills require Bitget API credentials and may still need UID whitelist access.
 - Bitget session endpoints return schedules; current session is an inference from those schedules plus the calendar.
 - Company overview is Bitget metadata, not a live US exchange tape. It is never used as `referencePrice`.

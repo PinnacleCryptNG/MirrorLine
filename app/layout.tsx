@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Investigation Evidence Pack",
+  title: "Mirrorline · Investigation Brief",
   description:
-    "Milestone 3 of Mirrorline: traceable FACT, INFERENCE, ASSUMPTION, and UNKNOWN evidence from Bitget Reality market context.",
+    "Milestone 4 of Mirrorline: a non-advisory investigation brief over classified Bitget Reality evidence.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -129,7 +129,7 @@ function SummaryChip({ label, value }: { label: string; value: number }) {
 function EvidenceCard({ item }: { item: EvidenceItem }) {
   const source = item.sources[0];
   return (
-    <article className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
+    <article id={`ev-${item.id}`} className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3 scroll-mt-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-data text-[11px] text-[#626B7A]">{item.id}</p>

@@ -17,6 +17,8 @@ import { normalizeRTokenSymbol } from "@/lib/bitget/symbols";
 import { REALITY_CANDLE_INTERVALS } from "@/lib/bitget/types";
 import { getMarketSnapshot } from "@/lib/market/context";
 import { buildEvidencePack } from "@/lib/evidence/pack";
+import { buildInvestigationBrief } from "@/lib/brief/generate";
+import { TENSION_IDS } from "@/lib/brief/types";
 
 export interface VerificationCheck {
   id: string;
@@ -365,6 +367,52 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         itemIds: pack.items.map((item) => item.id),
       },
     });
+
+    const brief = buildInvestigationBrief(pack);
+    const knownIds = new Set(pack.items.map((item) => item.id));
+    const citationsOk = Object.keys(brief.citations).every((id) => knownIds.has(id));
+    const tensionsOk = brief.tensions.every((tension) =>
+      tension.evidenceIds.every((id) => knownIds.has(id)),
+    );
+    const factsKeepClaims = brief.observedFacts.paragraphs.every((paragraph) => {
+      const item = pack.items.find((entry) => entry.id === paragraph.evidenceIds[0]);
+      return item ? paragraph.text.includes(item.claim) : false;
+    });
+    const namedWithoutTape = brief.tensions.some(
+      (tension) => tension.id === TENSION_IDS.namedUnderlyingWithoutTape && tension.severity === "tension",
+    );
+    const overnightIsContradiction = brief.tensions.some(
+      (tension) => tension.id === TENSION_IDS.tokenVsClosedEquity && tension.severity === "contradiction",
+    );
+    const invented = [brief.executiveSummary, brief.doesNotEstablish, brief.nextQuestions]
+      .flat()
+      .some((paragraph) =>
+        /NYSE print|NASDAQ print|breaking news|buy this|sell this/i.test(paragraph.text),
+      );
+    const briefHonest =
+      brief.advisory === false &&
+      citationsOk &&
+      tensionsOk &&
+      factsKeepClaims &&
+      namedWithoutTape &&
+      !overnightIsContradiction &&
+      !invented;
+    checks.push({
+      id: "investigation-brief",
+      title: "Compose a non-advisory investigation brief",
+      endpoint: `composed pack → GET /api/market/brief/${symbolInput}`,
+      access: "public",
+      status: briefHonest ? "pass" : "fail",
+      detail: briefHonest
+        ? `Brief has ${brief.observedFacts.paragraphs.length} fact lines, ${brief.derivedInferences.paragraphs.length} inferences, ${brief.unknowns.paragraphs.length} unknowns, ${brief.tensions.length} tensions. Citations resolve to pack IDs. Overnight token/US-close is not labeled a contradiction.`
+        : "Brief lost traceability, rewrote facts, invented claims, or mislabeled a tension as a contradiction.",
+      sample: {
+        question: brief.question,
+        tensionIds: brief.tensions.map((tension) => tension.id),
+        doesNotEstablish: brief.doesNotEstablish.map((paragraph) => paragraph.id),
+        cited: Object.keys(brief.citations),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -382,6 +430,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "investigation-brief",
+      title: "Compose a non-advisory investigation brief",
+      endpoint: `composed pack → GET /api/market/brief/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -390,7 +446,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "3-investigation-evidence-pack",
+    milestone: "4-investigation-brief",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -404,7 +460,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "No trading or order-execution endpoints are implemented.",
       "Market context labels every field as observed, derived, or unavailable. Stale and missing data stay explicit.",
       "Evidence packs classify Bitget context as FACT, INFERENCE, ASSUMPTION, or UNKNOWN. Assumptions are not facts.",
-      "No US tape is used. referencePrice, divergence, and news remain UNKNOWN.",
+      "Investigation briefs are non-advisory. Tensions cite evidence IDs; overnight rToken quoting vs closed US equity is a tension, not a contradiction.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

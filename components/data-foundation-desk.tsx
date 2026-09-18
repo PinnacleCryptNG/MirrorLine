@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { MarketContextPanel } from "@/components/market-context-panel";
 import { EvidencePackPanel } from "@/components/evidence-pack-panel";
+import { InvestigationBriefPanel } from "@/components/investigation-brief-panel";
 import { buildEvidencePack } from "@/lib/evidence/pack";
+import { buildInvestigationBrief } from "@/lib/brief/generate";
 import type { MarketContext, MarketSnapshotPayload, ResourceFailure } from "@/lib/market/types";
 
 export type CheckStatus = "pass" | "fail" | "skipped";
@@ -125,6 +127,7 @@ export function DataFoundationDesk({
   const context = snapshotContext(snapshot);
   const failures = snapshotFailures(snapshot);
   const pack = useMemo(() => (context ? buildEvidencePack(context) : null), [context]);
+  const brief = useMemo(() => (pack ? buildInvestigationBrief(pack) : null), [pack]);
   const last = context?.price.last;
   const change = context?.price.change24hPercent;
   const session = context?.session.marketSession;
@@ -139,11 +142,12 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 3</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Evidence Pack</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 4</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Brief</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Traceable FACT / INFERENCE / ASSUMPTION / UNKNOWN evidence from Bitget Reality context. Missing, stale, and
-            unverified items stay visible. This screen does not trade, invent a US tape, or treat assumptions as facts.
+            A non-advisory brief over Bitget Reality evidence: what is observed, inferred, assumed, unknown, and in
+            tension. Citation chips jump to the supporting evidence item. This screen does not trade or invent a US
+            tape.
           </p>
         </div>
         <form
@@ -216,6 +220,8 @@ export function DataFoundationDesk({
           </button>
         ))}
       </section>
+
+      <InvestigationBriefPanel brief={brief} />
 
       <EvidencePackPanel pack={pack} />
 
