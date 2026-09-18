@@ -560,6 +560,9 @@ export function buildEvidencePack(
       absentQuestion: `What public UTA book snapshot is available for ${token}?`,
       reasoning: "Optional public UTA SPOT book. This is not the whitelist Reality 40-level book.",
       caveats: [context.depth.note],
+      value: context.depth.publicUtaBook.value
+        ? `${context.depth.publicUtaBook.value.bidCount} bids / ${context.depth.publicUtaBook.value.askCount} asks`
+        : null,
     }),
   );
 
@@ -577,6 +580,9 @@ export function buildEvidencePack(
       reasoning:
         "Reality-specific depth requires API credentials and UID whitelist access. The public UTA book is not substituted for it.",
       caveats: ["Unauthorized or missing Reality depth stays UNKNOWN or unverified rather than fabricated."],
+      value: context.depth.realityBook.value
+        ? `${context.depth.realityBook.value.bidCount} bids / ${context.depth.realityBook.value.askCount} asks`
+        : null,
     }),
   );
 

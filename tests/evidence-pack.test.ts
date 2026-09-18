@@ -211,6 +211,7 @@ describe("buildEvidencePack", () => {
     expect(byId(pack, EVIDENCE_IDS.liquidityModel).classification).toBe("UNKNOWN");
     expect(byId(pack, EVIDENCE_IDS.depthReality).classification).toBe("UNKNOWN");
     expect(byId(pack, EVIDENCE_IDS.depthPublicUta).classification).toBe("FACT");
+    expect(byId(pack, EVIDENCE_IDS.depthPublicUta).value).toBe("1 bids / 1 asks");
     expect(byId(pack, EVIDENCE_IDS.depthPublicUta).caveats.join(" ")).toMatch(/not the whitelist Reality 40-level/i);
     expect(pack.items.filter((item) => item.classification === "FACT").every((item) => !/US tape print/i.test(item.claim))).toBe(true);
   });
