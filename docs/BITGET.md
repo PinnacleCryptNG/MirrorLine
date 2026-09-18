@@ -89,6 +89,14 @@ Claims are split into sentences and matched with exported `CLAIM_RULES` (directi
 
 `POST /api/market/challenge/{symbol}` accepts `{ thesis, reason?, assumptions? }`.
 
+## Thesis revision loop (Milestone 6)
+
+`lib/revision/diff.ts` compares two interpretation challenges. It does not call Bitget or an LLM.
+
+Claim identity uses exported thresholds: exact fingerprint, token containment, Jaccard ≥ 0.55, then Levenshtein ratio ≥ 0.72. Reordered claims keep identity. A status change on a new evidence snapshot is not attributed to the thesis edit. A status change is not a grade.
+
+`POST /api/market/revision/{symbol}` accepts `{ previous, thesis?, reason?, assumptions?, current?, sequence? }`. When `current` is omitted, a new challenge is gathered and then diffed (snapshot will usually change). The desk diffs against the already-loaded pack so comparisons stay on the same snapshot until the trader refreshes live data.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

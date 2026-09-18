@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { buildInterpretationChallenge } from "@/lib/challenge/engine";
+import { splitClaimText } from "@/lib/challenge/split";
+import { buildThesisRevision } from "@/lib/revision/diff";
+import { joinClaimSentences } from "@/lib/revision/claims";
+import { ThesisRevisionPanel } from "@/components/thesis-revision-panel";
 import type {
   AttackPoint,
   ClaimAssessment,
@@ -9,6 +13,7 @@ import type {
   InterpretationChallenge,
   MissingItem,
 } from "@/lib/challenge/types";
+import type { ThesisRevision } from "@/lib/revision/types";
 import type { InvestigationBrief, CitedEvidence } from "@/lib/brief/types";
 import type { EvidencePack } from "@/lib/evidence/types";
 import type { EvidenceClass } from "@/lib/market/fields";
@@ -189,15 +194,26 @@ export function InterpretationChallengePanel({
   );
   const [reason, setReason] = useState("");
   const [assumptions, setAssumptions] = useState("");
+  const [addClaim, setAddClaim] = useState("");
   const [challenge, setChallenge] = useState<InterpretationChallenge | null>(null);
+  const [history, setHistory] = useState<ThesisRevision[]>([]);
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const canRun = Boolean(pack && brief && thesis.trim());
+  const canRun = Boolean(pack && brief);
+  const sentences = useMemo(() => splitClaimText(thesis), [thesis]);
+  const snapshotStale = Boolean(
+    pack && challenge && pack.investigation.retrievedAt !== challenge.retrievedAt,
+  );
 
-  const run = () => {
+  const run = (asRevision: boolean) => {
     if (!pack || !brief) {
       setError("Verify live data first so the challenge can use the investigation brief and evidence pack.");
+      return;
+    }
+    if (!asRevision && !thesis.trim()) {
+      setError("A thesis is required for the first challenge.");
       return;
     }
     setBusy(true);
@@ -215,9 +231,17 @@ export function InterpretationChallengePanel({
             .filter(Boolean),
         },
       });
+      if (asRevision && challenge) {
+        const revision = buildThesisRevision({
+          previous: challenge,
+          current: next,
+          sequence: history.length + 1,
+        });
+        setHistory((current) => [...current, revision]);
+        setSelectedRevisionId(revision.revisionId);
+      }
       setChallenge(next);
     } catch (err) {
-      setChallenge(null);
       setError(err instanceof Error ? err.message : "Unable to run the interpretation challenge.");
     } finally {
       setBusy(false);
@@ -242,15 +266,15 @@ export function InterpretationChallengePanel({
         <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INTERPRETATION CHALLENGE · NON-ADVISORY</p>
         <h2 className="mt-2 text-lg font-medium">Stress-test an initial reading of {symbol}</h2>
         <p className="mt-1 text-sm text-[#9BA3B2]">
-          Submit a thesis. The engine matches claims to the existing brief and evidence pack with transparent
-          rules. Unmapped language is unassessed, not false. This is not a buy or sell recommendation.
+          Submit a thesis, then revise it after the challenge. Claims are matched with transparent rules. Unmapped
+          language is unassessed, not false. A later status change is not a recommendation or a grade.
         </p>
 
         <form
           className="mt-4 flex flex-col gap-3"
           onSubmit={(event) => {
             event.preventDefault();
-            run();
+            run(Boolean(challenge));
           }}
         >
           <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-[#626B7A]">
@@ -272,6 +296,60 @@ export function InterpretationChallengePanel({
               aria-label="Initial interpretation"
             />
           </label>
+          {challenge ? (
+            <div className="rounded-md border border-[#252B36] bg-[#080A0F] px-3 py-3">
+              <p className="text-xs uppercase tracking-wide text-[#626B7A]">Claims in this thesis</p>
+              <ul className="mt-2 space-y-2">
+                {sentences.length === 0 ? (
+                  <li className="text-sm text-[#9BA3B2]">No claim sentences remain. Revising will record every prior claim as removed.</li>
+                ) : (
+                  sentences.map((sentence, index) => (
+                    <li key={`claim-row-${index}`} className="flex flex-col gap-2 md:flex-row">
+                      <input
+                        value={sentence}
+                        onChange={(event) => {
+                          const next = [...sentences];
+                          next[index] = event.target.value;
+                          setThesis(joinClaimSentences(next));
+                        }}
+                        className="h-10 flex-1 rounded-md border border-[#252B36] bg-[#10131A] px-3 text-sm outline-none focus:border-[#8B7CFF]"
+                        aria-label={`Claim ${index + 1}`}
+                      />
+                      <button
+                        type="button"
+                        className="h-10 rounded-md border border-[#252B36] px-3 text-xs text-[#FF6B7A]"
+                        onClick={() => setThesis(joinClaimSentences(sentences.filter((_, item) => item !== index)))}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
+              <div className="mt-3 flex flex-col gap-2 md:flex-row">
+                <input
+                  value={addClaim}
+                  onChange={(event) => setAddClaim(event.target.value)}
+                  className="h-10 flex-1 rounded-md border border-[#252B36] bg-[#10131A] px-3 text-sm outline-none focus:border-[#8B7CFF]"
+                  placeholder="Add a new claim"
+                  aria-label="Add a new claim"
+                />
+                <button
+                  type="button"
+                  className="h-10 rounded-md border border-[#8B7CFF]/40 px-3 text-xs text-[#8B7CFF]"
+                  onClick={() => {
+                    if (!addClaim.trim()) {
+                      return;
+                    }
+                    setThesis(joinClaimSentences([...sentences, addClaim.trim()]));
+                    setAddClaim("");
+                  }}
+                >
+                  Add claim
+                </button>
+              </div>
+            </div>
+          ) : null}
           <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-[#626B7A]">
             Optional reason
             <textarea
@@ -294,15 +372,37 @@ export function InterpretationChallengePanel({
               aria-label="Optional key assumptions"
             />
           </label>
-          <button
-            type="submit"
-            disabled={!canRun || busy}
-            className="h-10 w-fit rounded-md bg-[#8B7CFF] px-4 text-sm font-medium text-[#080A0F] disabled:opacity-60"
-          >
-            {busy ? "Running challenge…" : "Run challenge"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="submit"
+              disabled={!canRun || busy || (!challenge && !thesis.trim())}
+              className="h-10 w-fit rounded-md bg-[#8B7CFF] px-4 text-sm font-medium text-[#080A0F] disabled:opacity-60"
+            >
+              {busy ? "Running…" : challenge ? "Revise and re-challenge" : "Run challenge"}
+            </button>
+            {challenge ? (
+              <button
+                type="button"
+                className="h-10 rounded-md border border-[#252B36] px-4 text-sm text-[#9BA3B2]"
+                onClick={() => {
+                  setChallenge(null);
+                  setHistory([]);
+                  setSelectedRevisionId(null);
+                  setError(null);
+                }}
+              >
+                Start new thesis
+              </button>
+            ) : null}
+          </div>
         </form>
 
+        {snapshotStale ? (
+          <p className="mt-3 text-sm text-[#F4C95D]">
+            Live evidence was refreshed at {pack?.investigation.retrievedAt}. The next revision will be compared
+            across snapshots, and status changes will not be attributed to the thesis edit alone.
+          </p>
+        ) : null}
         {!pack || !brief ? (
           <p className="mt-3 text-sm text-[#9BA3B2]">
             Verify live data to load the investigation brief and evidence pack before running a challenge.
@@ -390,6 +490,19 @@ export function InterpretationChallengePanel({
                 ))}
               </ul>
             </section>
+          ) : null}
+
+          {history.length > 0 ? (
+            <ThesisRevisionPanel
+              history={history}
+              selectedId={selectedRevisionId}
+              onSelect={setSelectedRevisionId}
+              onRestore={(revision) => {
+                setThesis(revision.revisedThesis.thesis);
+                setReason(revision.revisedThesis.reason ?? "");
+                setAssumptions((revision.revisedThesis.assumptions ?? []).join("\n"));
+              }}
+            />
           ) : null}
         </>
       ) : null}

@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 5 public interpretation challenges
+## Required for Milestone 6 public thesis revisions
 
-None. Challenges are composed from the public investigation brief. No LLM key is required.
+None. Revision diffs are composed from interpretation challenges. No LLM key or database is required.
 
 ## Optional
 

@@ -20,6 +20,7 @@ import { buildEvidencePack } from "@/lib/evidence/pack";
 import { buildInvestigationBrief } from "@/lib/brief/generate";
 import { TENSION_IDS } from "@/lib/brief/types";
 import { buildInterpretationChallenge } from "@/lib/challenge/engine";
+import { buildThesisRevision } from "@/lib/revision/diff";
 
 export interface VerificationCheck {
   id: string;
@@ -479,6 +480,58 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         attackIds: challenge.attackMyThesis.map((entry) => entry.id),
       },
     });
+
+    const revised = buildInterpretationChallenge({
+      pack,
+      brief,
+      input: {
+        thesis: `${pack.investigation.tokenSymbol} fell. The US stock market is closed.`,
+        assumptions: ["The last print is current."],
+      },
+    });
+    const revision = buildThesisRevision({
+      previous: challenge,
+      current: revised,
+      sequence: 1,
+      createdAt: pack.investigation.retrievedAt,
+    });
+    const revisionBlob = JSON.stringify({
+      claims: revision.claims.map((item) => ({
+        change: item.change,
+        attribution: item.attribution,
+        matchReason: item.matchReason,
+      })),
+      warning: revision.snapshotWarning,
+      limitations: revision.limitations,
+    });
+    const revisionHonest =
+      revision.advisory === false &&
+      revision.milestone === "6-thesis-revision-loop" &&
+      revision.snapshotChanged === false &&
+      revision.summary.removed > 0 &&
+      revision.summary.added > 0 &&
+      revision.claims.some((item) => item.change === "unchanged" || item.change === "edited") &&
+      !/should buy|should sell|price will|improved the thesis|now a buy/i.test(revisionBlob) &&
+      revision.claims.every((item) => item.attribution !== "evidence-snapshot" || revision.snapshotChanged);
+    checks.push({
+      id: "thesis-revision-loop",
+      title: "Diff a revised thesis against the prior challenge",
+      endpoint: `composed challenges → POST /api/market/revision/${symbolInput}`,
+      access: "public",
+      status: revisionHonest ? "pass" : "fail",
+      detail: revisionHonest
+        ? `Revision ${revision.sequence}: ${revision.summary.added} added, ${revision.summary.removed} removed, ${revision.summary.edited} edited, ${revision.summary.reordered} reordered. Same snapshot ${revision.currentSnapshot.retrievedAt}.`
+        : "Revision lost identity, treated a status change as a score, or mixed snapshot attribution.",
+      sample: {
+        summary: revision.summary,
+        snapshotChanged: revision.snapshotChanged,
+        changes: revision.claims.map((item) => ({
+          change: item.change,
+          attribution: item.attribution,
+          statusChanged: item.statusChanged,
+        })),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -512,6 +565,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "thesis-revision-loop",
+      title: "Diff a revised thesis against the prior challenge",
+      endpoint: `composed challenges → POST /api/market/revision/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -520,7 +581,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "5-interpretation-challenge",
+    milestone: "6-thesis-revision-loop",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -536,6 +597,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Evidence packs classify Bitget context as FACT, INFERENCE, ASSUMPTION, or UNKNOWN. Assumptions are not facts.",
       "Investigation briefs are non-advisory. Tensions cite evidence IDs; overnight rToken quoting vs closed US equity is a tension, not a contradiction.",
       "Interpretation challenges match thesis claims with transparent rules. Unmapped language is unassessed, not false. Missing evidence does not disprove a thesis.",
+      "Thesis revisions compare two challenges. Reordered or lightly edited claims keep identity when fingerprints or token overlap match. A status change is not a score.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

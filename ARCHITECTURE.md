@@ -1,19 +1,20 @@
 # Architecture
 
-Milestone 5 sits on the Milestone 4 investigation brief. The challenge engine does not call Bitget, does not reclassify fields, and does not use an LLM. It matches a trader thesis to existing evidence with transparent rules.
+Milestone 6 sits on the Milestone 5 interpretation challenge. The revision loop does not call Bitget, does not reclassify evidence, and does not use an LLM. It diffs two challenges with a published claim-matching strategy.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/challenge (interpretation challenge)
-      → lib/brief (investigation brief, tensions)
-        → lib/evidence (FACT / INFERENCE / ASSUMPTION / UNKNOWN pack)
-          → lib/market
-            → lib/bitget
-              → https://api.bitget.com
+    → lib/revision (thesis revision loop)
+      → lib/challenge (interpretation challenge)
+        → lib/brief (investigation brief, tensions)
+          → lib/evidence (FACT / INFERENCE / ASSUMPTION / UNKNOWN pack)
+            → lib/market
+              → lib/bitget
+                → https://api.bitget.com
 ```
 
-No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented. The challenge is deterministic (no LLM) and is not a multi-agent pipeline.
+No Bitget credentials or raw provider calls are exposed to the client. Trading endpoints are not implemented. Revisions are deterministic (no LLM) and are not a multi-agent pipeline. History is session-only; there is no database.
 
 ## Layout
 
@@ -21,18 +22,22 @@ No Bitget credentials or raw provider calls are exposed to the client. Trading e
 - `lib/market/` — labeled market context (Milestone 2)
 - `lib/evidence/` — classified evidence pack (Milestone 3)
 - `lib/brief/` — investigation brief (Milestone 4)
-- `lib/challenge/types.ts` — interpretation challenge schema
-- `lib/challenge/split.ts` — sentence / assumption splitting
-- `lib/challenge/rules.ts` — transparent claim-matching rules
-- `lib/challenge/engine.ts` — pack + brief + thesis → challenge
-- `lib/challenge/get-challenge.ts` — gathers evidence once, then challenges
-- `app/api/market/challenge/[symbol]/route.ts` — HTTP surface
+- `lib/challenge/` — interpretation challenge (Milestone 5)
+- `lib/revision/types.ts` — revision record and claim-change schema
+- `lib/revision/claims.ts` — fingerprints, units, snapshot ids
+- `lib/revision/match.ts` — exact fingerprint → containment → Jaccard → Levenshtein
+- `lib/revision/diff.ts` — pack-free previous/current challenge diff
+- `lib/revision/get-revision.ts` — optional live re-challenge, then diff
+- `app/api/market/revision/[symbol]/route.ts` — HTTP surface
 
-## Claim statuses
+The desk prefers the same loaded evidence pack for before/after. If Bitget data is refreshed, the next revision is marked `snapshotChanged` and status shifts are not attributed to the thesis edit alone.
 
-- **supported** — a rule matched and pack FACT/INFERENCE affirms the specific claim
-- **challenged** — a rule matched and pack evidence contradicts or freshness-limits the claim
-- **unsupported** — a rule matched but required evidence is UNKNOWN/missing (not disproven)
-- **unassessed** — no reliable rule mapped the sentence, polarity was negated, or the claim is a trade action
+## Claim matching (transparent)
 
-Overnight rToken quoting vs a closed US equity session remains a brief tension. Attack points only restate existing evidence and tensions. UNKNOWN is never treated as proof the thesis is false.
+1. Exact normalized fingerprint and same source
+2. Token containment (smaller set ⊆ larger, at least 2 tokens)
+3. Token Jaccard ≥ 0.55
+4. Levenshtein ratio ≥ 0.72
+5. Otherwise added / removed — never a silent rewrite
+
+A status change is not a score. UNKNOWN is never treated as proof the thesis is false.

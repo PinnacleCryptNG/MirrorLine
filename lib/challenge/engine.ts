@@ -655,13 +655,13 @@ function buildTraderAssumptions(
   return list;
 }
 
-export function parseThesisInput(raw: unknown): ThesisInput {
+export function parseThesisInput(raw: unknown, options: { allowEmpty?: boolean } = {}): ThesisInput {
   if (typeof raw !== "object" || raw === null) {
     throw new Error("Challenge input must be an object with a thesis string.");
   }
   const record = raw as Record<string, unknown>;
   const thesis = typeof record.thesis === "string" ? record.thesis.trim() : "";
-  if (!thesis) {
+  if (!thesis && !options.allowEmpty) {
     throw new Error("A thesis is required.");
   }
   if (thesis.length > 4000) {
