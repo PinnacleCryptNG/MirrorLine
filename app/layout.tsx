@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Structured Claim Composer",
+  title: "Mirrorline · Investigation Report Export",
   description:
-    "Milestone 7 of Mirrorline: compose explicit rToken claims and challenge them against Bitget Reality evidence. Non-advisory.",
+    "Milestone 8 of Mirrorline: export a non-advisory rToken investigation report from the currently loaded evidence snapshot.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

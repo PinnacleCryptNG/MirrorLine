@@ -24,6 +24,10 @@ import { buildThesisRevision } from "@/lib/revision/diff";
 import { buildComposerChallenge } from "@/lib/composer/challenge";
 import { createStructuredClaim } from "@/lib/composer/validate";
 import type { StructuredClaim } from "@/lib/challenge/types";
+import { assembleInvestigationReport } from "@/lib/report/assemble";
+import { serializeInvestigationReportHtml } from "@/lib/report/html";
+import { serializeInvestigationReportJson } from "@/lib/report/json";
+import { serializeInvestigationReportMarkdown } from "@/lib/report/markdown";
 
 export interface VerificationCheck {
   id: string;
@@ -589,6 +593,47 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         })),
       },
     });
+
+    const exported = assembleInvestigationReport({
+      pack,
+      brief,
+      challenge: composer,
+      revisions: [revision],
+      createdAt: new Date().toISOString(),
+    });
+    const markdown = serializeInvestigationReportMarkdown(exported);
+    const json = serializeInvestigationReportJson(exported);
+    const html = serializeInvestigationReportHtml(exported);
+    const parsed = JSON.parse(json) as { advisory?: boolean; snapshot?: { retrievedAt?: string }; createdAt?: string };
+    const exportHonest =
+      exported.milestone === "8-investigation-report-export" &&
+      exported.advisory === false &&
+      exported.createdAt !== exported.snapshot.retrievedAt &&
+      exported.pack.items.every((item) =>
+        ["FACT", "INFERENCE", "ASSUMPTION", "UNKNOWN"].includes(item.classification),
+      ) &&
+      !/BITGET_API_KEY|BITGET_API_SECRET|BITGET_PASSPHRASE/.test(json) &&
+      html.includes("window.print") &&
+      html.includes("NON-ADVISORY") &&
+      !/should buy|should sell|price will|NYSE print showed/i.test(`${markdown}\n${json}\n${html}`) &&
+      parsed.advisory === false &&
+      parsed.snapshot?.retrievedAt === pack.investigation.retrievedAt;
+    checks.push({
+      id: "investigation-report-export",
+      title: "Export a non-advisory investigation report from the loaded snapshot",
+      endpoint: `composed models → POST /api/market/report/${symbolInput}`,
+      access: "public",
+      status: exportHonest ? "pass" : "fail",
+      detail: exportHonest
+        ? `Report ${exported.reportId} created ${exported.createdAt}; evidence retrieved ${exported.snapshot.retrievedAt}. ${exported.revisions.length} revision(s) attached. No Bitget refresh.`
+        : "Export invented conclusions, mixed timestamps, leaked secrets, or treated UNKNOWN as false.",
+      sample: {
+        createdAt: exported.createdAt,
+        snapshotRetrievedAt: exported.snapshot.retrievedAt,
+        stale: exported.snapshot.stale,
+        classifications: exported.classifications,
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -638,6 +683,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "investigation-report-export",
+      title: "Export a non-advisory investigation report from the loaded snapshot",
+      endpoint: `composed models → POST /api/market/report/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -646,7 +699,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "7-structured-claim-composer",
+    milestone: "8-investigation-report-export",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -664,6 +717,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Interpretation challenges match thesis claims with transparent rules. Unmapped language is unassessed, not false. Missing evidence does not disprove a thesis.",
       "Thesis revisions compare two challenges. Reordered or lightly edited claims keep identity when fingerprints or token overlap match. A status change is not a score.",
       "Structured claims use explicit kinds and fields. Selecting a type does not verify the assertion. Intraday direction is unassessed because the pack only classifies 24-hour change.",
+      "Investigation report export packages the currently loaded pack, brief, challenge, and revision trail. It does not refresh Bitget. Report creation time is not a source timestamp.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

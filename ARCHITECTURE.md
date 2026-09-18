@@ -1,11 +1,12 @@
 # Architecture
 
-Milestone 7 sits on the Milestone 5 challenge engine and Milestone 6 revision loop. The composer does not call Bitget and does not invent evidence. It turns explicit claim kinds into sentences the existing engine can score, then applies timeframe and data-limitation guards.
+Milestone 8 sits on the completed investigation stack. The report assembler does not call Bitget and does not reinterpret evidence. It packages the currently loaded pack, brief, challenge, and revision trail, then serializes JSON, Markdown, and print-friendly HTML.
 
 ```
 Browser
   → Next.js route handlers in app/api/market
-    → lib/composer (structured claim composer)
+    → lib/report (investigation report export)
+      → lib/composer (structured claim composer)
       → lib/revision (thesis revision loop)
       → lib/challenge (interpretation challenge)
         → lib/brief
@@ -15,15 +16,12 @@ Browser
                 → https://api.bitget.com
 ```
 
-Selecting a structured kind does not verify the claim. Optional free text is kept as written.
+Export never refreshes the snapshot. Report creation time is stored separately from Bitget observation timestamps.
 
 ## Layout
 
-- `lib/composer/schema.ts` — kinds, permitted fields, limitations
-- `lib/composer/validate.ts` — parse/validate structured input
-- `lib/composer/render.ts` — kind + fields → engine sentence
-- `lib/composer/challenge.ts` — engine call + guards
-- `app/api/market/composer/[symbol]/route.ts` — HTTP surface
-- `components/structured-claim-composer.tsx` — desk composer
-
-Revision identity prefers a structured claim id when present, then the Milestone 6 fingerprint strategy. Same-snapshot attribution rules are unchanged. Optional free text is stored on `challenge.composer.freeText` and is not rewritten into structured rows.
+- `lib/report/types.ts` — InvestigationReport model and disclaimers
+- `lib/report/assemble.ts` — deterministic assembly from loaded models
+- `lib/report/markdown.ts` / `html.ts` / `json.ts` — serializers
+- `app/api/market/report/[symbol]/route.ts` — POST-only export of posted models
+- `components/investigation-report-panel.tsx` — desk preview and download/print controls

@@ -25,6 +25,10 @@ body {
   font-family: var(--font-geist-sans), Inter, system-ui, sans-serif;
 }
 
-.font-data {
-  font-family: var(--font-geist-mono), "IBM Plex Mono", ui-monospace, monospace;
+@media print {
+  .report-print-root {
+    background: #fff !important;
+    color: #111 !important;
+    border: none !important;
+  }
 }

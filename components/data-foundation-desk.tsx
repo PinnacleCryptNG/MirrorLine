@@ -5,8 +5,11 @@ import { MarketContextPanel } from "@/components/market-context-panel";
 import { EvidencePackPanel } from "@/components/evidence-pack-panel";
 import { InvestigationBriefPanel } from "@/components/investigation-brief-panel";
 import { InterpretationChallengePanel } from "@/components/interpretation-challenge-panel";
+import { InvestigationReportPanel } from "@/components/investigation-report-panel";
 import { buildEvidencePack } from "@/lib/evidence/pack";
 import { buildInvestigationBrief } from "@/lib/brief/generate";
+import type { InterpretationChallenge } from "@/lib/challenge/types";
+import type { ThesisRevision } from "@/lib/revision/types";
 import type { MarketContext, MarketSnapshotPayload, ResourceFailure } from "@/lib/market/types";
 
 export type CheckStatus = "pass" | "fail" | "skipped";
@@ -84,10 +87,14 @@ export function DataFoundationDesk({
   const [snapshot, setSnapshot] = useState<MarketSnapshotPayload | Record<string, unknown> | null>(initialSnapshot);
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
+  const [challenge, setChallenge] = useState<InterpretationChallenge | null>(null);
+  const [revisions, setRevisions] = useState<ThesisRevision[]>([]);
 
   const load = async (nextSymbol: string, nextQuery = query) => {
     setLoading(true);
     setError(null);
+    setChallenge(null);
+    setRevisions([]);
     try {
       const [verifyRes, instrumentsRes, snapshotRes] = await Promise.all([
         fetch(`/api/market/verify?symbol=${encodeURIComponent(nextSymbol)}`, { cache: "no-store" }),
@@ -143,11 +150,11 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 7</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Structured Claim Composer</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 8</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Investigation Report Export</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Compose an rToken reading with explicit claim types, challenge them against the investigation brief, then
-            revise. Selecting a kind is not a verified fact. This desk does not trade, predict, or invent a US tape.
+            Package the currently loaded evidence pack, brief, structured challenge, and revision trail as a
+            non-advisory report. Export does not refresh Bitget or invent a US tape.
           </p>
         </div>
         <form
@@ -222,10 +229,22 @@ export function DataFoundationDesk({
       </section>
 
       <InterpretationChallengePanel
-        key={pack?.investigation.tokenSymbol ?? symbol}
+        key={pack?.investigation.retrievedAt ?? symbol}
         symbol={pack?.investigation.tokenSymbol ?? symbol}
         pack={pack}
         brief={brief}
+        onInvestigationChange={(state) => {
+          setChallenge(state.challenge);
+          setRevisions(state.history);
+        }}
+      />
+
+      <InvestigationReportPanel
+        pack={pack}
+        brief={brief}
+        context={context}
+        challenge={challenge}
+        revisions={revisions}
       />
 
       <InvestigationBriefPanel brief={brief} />

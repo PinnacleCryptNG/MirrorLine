@@ -105,6 +105,14 @@ Direction with an intraday or unspecified timeframe is **unassessed**, not score
 
 `POST /api/market/composer/{symbol}` accepts `{ claims, freeText?, reason?, assumptions? }`. Optional free text is kept as written. Revision identity prefers a structured claim id, then the Milestone 6 fingerprint strategy.
 
+## Investigation report export (Milestone 8)
+
+`lib/report/assemble.ts` packages the currently loaded evidence pack, brief, challenge, and revision trail. It does not call Bitget or an LLM.
+
+Report creation time is stored separately from evidence `retrievedAt` / `observedAt`. Stale pack items are labeled, not replaced. UNKNOWN remains unanswered. Export does not invent US tape, news, liquidity, or Reality depth.
+
+`POST /api/market/report/{symbol}?format=json|markdown|html` accepts `{ pack, brief, challenge?, revisions?, context?, question?, createdAt? }`. Omitting the loaded pack is a 400, not a live refresh.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

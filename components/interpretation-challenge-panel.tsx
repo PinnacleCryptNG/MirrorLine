@@ -190,10 +190,15 @@ export function InterpretationChallengePanel({
   symbol,
   pack,
   brief,
+  onInvestigationChange,
 }: {
   symbol: string;
   pack: EvidencePack | null;
   brief: InvestigationBrief | null;
+  onInvestigationChange?: (state: {
+    challenge: InterpretationChallenge | null;
+    history: ThesisRevision[];
+  }) => void;
 }) {
   const [thesis, setThesis] = useState("");
   const [reason, setReason] = useState("");
@@ -256,10 +261,15 @@ export function InterpretationChallengePanel({
           current: next,
           sequence: history.length + 1,
         });
-        setHistory((current) => [...current, revision]);
+        const nextHistory = [...history, revision];
+        setHistory(nextHistory);
         setSelectedRevisionId(revision.revisionId);
+        setChallenge(next);
+        onInvestigationChange?.({ challenge: next, history: nextHistory });
+      } else {
+        setChallenge(next);
+        onInvestigationChange?.({ challenge: next, history });
       }
-      setChallenge(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to run the interpretation challenge.");
     } finally {
@@ -418,6 +428,7 @@ export function InterpretationChallengePanel({
                   setSelectedRevisionId(null);
                   setStructuredClaims([]);
                   setError(null);
+                  onInvestigationChange?.({ challenge: null, history: [] });
                 }}
               >
                 Start new thesis

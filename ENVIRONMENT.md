@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 7 structured claim composer
+## Required for Milestone 8 investigation report export
 
-None. Structured claims render into the existing challenge engine. No LLM key or database is required.
+None. Reports assemble already-loaded investigation models. No LLM key or database is required.
 
 ## Optional
 
