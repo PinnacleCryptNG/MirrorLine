@@ -93,6 +93,9 @@ function columnFromLoaded(
     tokenSymbol: inner.tokenSymbol,
     loadStatus: "loaded",
     error: null,
+    isDemoFixture: inner.isDemoFixture,
+    fixtureId: inner.fixtureId,
+    fixtureLabel: inner.fixtureLabel,
     snapshot: inner.snapshot,
     contextSummary: inner.contextSummary,
     pack: inner.pack,
@@ -137,17 +140,32 @@ export function assembleComparisonReport(input: AssembleComparisonInput): Compar
       : "Snapshot retrievedAt values differ across columns and are not averaged or aligned.",
   ];
 
+  const isDemo = symbols.some((item) => item.isDemoFixture);
+
   const report: ComparisonReport = {
     milestone: "9-multi-symbol-comparison",
     advisory: false,
     reportId: `compare.${symbols.map((item) => item.pair ?? item.requestedSymbol).join("-")}.${createdAt.replace(/[:.]/g, "")}`,
     createdAt,
+    isDemoFixture: isDemo,
     sharedClaims: claims,
     freeText: input.freeText,
     symbols,
     table: buildComparisonTable(claims, symbols),
-    disclaimers: [...COMPARISON_DISCLAIMERS],
+    disclaimers: [
+      ...(isDemo
+        ? [
+            "DEMO / FIXTURE DATA: One or more columns were assembled from frozen demonstration fixtures, not live Bitget market data.",
+          ]
+        : []),
+      ...COMPARISON_DISCLAIMERS,
+    ],
     limitations: uniqueLines([
+      ...(isDemo
+        ? [
+            "DEMO / FIXTURE DATA: Comparison includes frozen demonstration fixtures. Do not use for live trading.",
+          ]
+        : []),
       ...COMPARISON_LIMITATIONS,
       ...extraLimits,
       ...symbols.flatMap((item) => item.brief?.limitations ?? []),

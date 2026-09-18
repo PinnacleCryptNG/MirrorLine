@@ -55,11 +55,18 @@ export function serializeInvestigationReportMarkdown(report: InvestigationReport
   const lines: string[] = [
     `# Mirrorline investigation report — ${report.tokenSymbol}`,
     "",
+    ...(report.isDemoFixture
+      ? [
+          `> **DEMO / FIXTURE DATA** · Frozen demonstration scenario: ${report.fixtureLabel ?? report.fixtureId ?? "fixture"}. This export does not contain live Bitget market data.`,
+          "",
+        ]
+      : []),
     `**Non-advisory.** This is not a trade recommendation and not a price prediction.`,
     "",
     `- Report created: ${report.createdAt}`,
-    `- Evidence snapshot retrieved: ${report.snapshot.retrievedAt}`,
+    `- Evidence snapshot retrieved: ${report.snapshot.retrievedAt}${report.isDemoFixture ? " (fixture timestamp)" : ""}`,
     `- Snapshot id: \`${report.snapshot.id}\``,
+    ...(report.isDemoFixture ? [`- Fixture scenario: \`${report.fixtureId ?? "custom"}\``] : []),
     `- Pair: ${report.pair}`,
     `- Question: ${report.question}`,
     `- Report id: \`${report.reportId}\``,

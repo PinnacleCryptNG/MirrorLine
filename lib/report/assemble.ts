@@ -138,6 +138,9 @@ function buildSnapshot(
     pair: pack.investigation.pair,
     tokenSymbol: pack.investigation.tokenSymbol,
     retrievedAt: pack.investigation.retrievedAt,
+    isDemoFixture: pack.investigation.isDemoFixture,
+    fixtureId: pack.investigation.fixtureId,
+    fixtureLabel: pack.investigation.fixtureLabel,
     stale: staleEvidenceIds.length > 0,
     staleEvidenceIds,
     challengeMatchesSnapshot,
@@ -168,11 +171,18 @@ export function assembleInvestigationReport(input: AssembleReportInput): Investi
     challenge?.input.structuredClaims ??
     [];
 
+  const isDemo = Boolean(pack.investigation.isDemoFixture || input.context?.isDemoFixture);
+  const fixtureId = pack.investigation.fixtureId ?? input.context?.fixtureId;
+  const fixtureLabel = pack.investigation.fixtureLabel ?? input.context?.fixtureLabel;
+
   const report: InvestigationReport = {
     milestone: "8-investigation-report-export",
     advisory: false,
     reportId: `report.${pack.investigation.pair}.${createdAt.replace(/[:.]/g, "")}`,
     createdAt,
+    isDemoFixture: isDemo,
+    fixtureId,
+    fixtureLabel,
     question: input.question?.trim() || brief.question || pack.investigation.question,
     requestedSymbol: pack.investigation.requestedSymbol,
     pair: pack.investigation.pair,
@@ -188,8 +198,20 @@ export function assembleInvestigationReport(input: AssembleReportInput): Investi
     tensions: brief.tensions,
     citations: { ...brief.citations, ...(challenge?.citations ?? {}) },
     failures: uniqueFailures(pack, brief, challenge),
-    disclaimers: [...REPORT_DISCLAIMERS],
+    disclaimers: [
+      ...(isDemo
+        ? [
+            `DEMO / FIXTURE DATA: This report was assembled from frozen demonstration fixtures (${fixtureLabel ?? fixtureId ?? "fixture"}), not live Bitget market data. Timestamps reflect the fixture's recorded scenario, not the current market.`,
+          ]
+        : []),
+      ...REPORT_DISCLAIMERS,
+    ],
     limitations: uniqueLines([
+      ...(isDemo
+        ? [
+            `DEMO / FIXTURE DATA: This report does not represent live Bitget market conditions.`,
+          ]
+        : []),
       ...REPORT_LIMITATIONS,
       ...pack.limitations,
       ...brief.limitations,

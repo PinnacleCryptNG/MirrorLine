@@ -11,13 +11,20 @@ function symbolHeading(column: ComparisonSymbolColumn): string {
   const name = column.tokenSymbol ?? column.requestedSymbol;
   const retrieved = column.snapshot?.retrievedAt ?? "snapshot not loaded";
   const stale = column.snapshot?.stale ? "stale" : column.loadStatus;
-  return `${name} (${stale}; retrieved ${retrieved})`;
+  const demoTag = column.isDemoFixture ? " · FIXTURE DATA" : "";
+  return `${name} (${stale}${demoTag}; retrieved ${retrieved})`;
 }
 
 export function serializeComparisonReportMarkdown(report: ComparisonReport): string {
   const lines: string[] = [
     `# Mirrorline multi-symbol comparison`,
     "",
+    ...(report.isDemoFixture
+      ? [
+          `> **DEMO / FIXTURE DATA** · This comparison includes frozen demonstration fixtures, not live Bitget market data.`,
+          "",
+        ]
+      : []),
     "**Non-advisory.** This comparison does not rank symbols, recommend trades, or predict price.",
     "",
     `- Report created: ${report.createdAt}`,

@@ -56,6 +56,9 @@ export interface InvestigationBrief {
   pair: string;
   tokenSymbol: string;
   retrievedAt: string;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   executiveSummary: BriefParagraph[];
   marketAndSession: BriefSection;
   observedFacts: BriefSection;

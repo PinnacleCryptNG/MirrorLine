@@ -14,9 +14,16 @@ function heading(column: ComparisonSymbolColumn): string {
 }
 
 export function serializeComparisonReportHtml(report: ComparisonReport): string {
+  const demoBanner = report.isDemoFixture
+    ? `<section class="card" style="border: 2px solid #b45309; background:#fffbeb; padding: 12px 16px; margin: 16px 0;">
+        <p><strong>DEMO / FIXTURE DATA</strong> · This comparison was assembled using frozen demonstration fixtures, not live Bitget market data. Timestamps reflect each fixture's recorded scenario.</p>
+      </section>`
+    : "";
+
   const headers = report.symbols
     .map((column) => {
-      return `<th>${text(heading(column))}<div class="meta">${text(column.snapshot?.retrievedAt ?? column.error ?? "snapshot not loaded")}${column.snapshot?.stale ? " · stale" : ""}</div></th>`;
+      const fixtureTag = column.isDemoFixture ? " · FIXTURE" : "";
+      return `<th>${text(heading(column))}<div class="meta">${text(column.snapshot?.retrievedAt ?? column.error ?? "snapshot not loaded")}${column.snapshot?.stale ? " · stale" : ""}${fixtureTag}</div></th>`;
     })
     .join("");
   const rows = report.table
@@ -82,6 +89,7 @@ export function serializeComparisonReportHtml(report: ComparisonReport): string 
       <li>Report created: <strong>${text(report.createdAt)}</strong></li>
       <li>Columns: ${report.symbols.map((item) => text(item.tokenSymbol ?? item.requestedSymbol)).join(", ")}</li>
     </ul>
+    ${demoBanner}
     <h2>Disclaimers</h2>
     <ul>${report.disclaimers.map((line) => `<li>${text(line)}</li>`).join("")}</ul>
     ${report.freeText ? `<p>Optional free text (kept as written): ${text(report.freeText)}</p>` : ""}

@@ -154,6 +154,9 @@ export function buildInvestigationBrief(pack: EvidencePack): InvestigationBrief 
     pair: pack.investigation.pair,
     tokenSymbol: pack.investigation.tokenSymbol,
     retrievedAt: pack.investigation.retrievedAt,
+    isDemoFixture: pack.investigation.isDemoFixture,
+    fixtureId: pack.investigation.fixtureId,
+    fixtureLabel: pack.investigation.fixtureLabel,
     executiveSummary,
     marketAndSession: section(
       "market-session",

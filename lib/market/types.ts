@@ -36,6 +36,9 @@ export interface MarketContext {
   pair: string;
   tokenSymbol: string;
   retrievedAt: string;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   instrument: {
     pair: ContextField<string>;
     tokenSymbol: ContextField<string>;
@@ -116,6 +119,9 @@ export interface MarketRawInput {
   retrievedAt: Date;
   requestedSymbol: string;
   pair: string;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   instrument?: RealityInstrument | null;
   instrumentError?: string;
   ticker?: RealityTicker | null;
@@ -140,6 +146,9 @@ export interface MarketRawInput {
 }
 
 export interface MarketSnapshotPayload {
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   instrument: RealityInstrument | null;
   ticker: RealityTicker | null;
   candles: Candle[] | null;

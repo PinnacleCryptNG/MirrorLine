@@ -96,6 +96,9 @@ export interface EvidencePack {
     pair: string;
     tokenSymbol: string;
     retrievedAt: string;
+    isDemoFixture?: boolean;
+    fixtureId?: string;
+    fixtureLabel?: string;
   };
   items: EvidenceItem[];
   summary: EvidencePackSummary;

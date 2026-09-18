@@ -24,6 +24,12 @@ function fieldCard(label: string, field: ReportFieldSnapshot | null): string {
 
 export function serializeInvestigationReportHtml(report: InvestigationReport): string {
   const challenge = report.challenge;
+  const demoBanner = report.isDemoFixture
+    ? `<section class="banner demo-banner" style="border-color:#b45309; background:#fffbeb;">
+        <p><strong>DEMO / FIXTURE DATA</strong> · Scenario: ${text(report.fixtureLabel ?? report.fixtureId ?? "Demo fixture")}. This export was assembled from frozen demonstration fixtures, not live Bitget market data. Timestamps reflect the fixture's recorded scenario.</p>
+      </section>`
+    : "";
+
   const staleBanner = report.snapshot.stale || report.snapshot.warning
     ? `<section class="banner">${
         report.snapshot.stale
@@ -139,11 +145,13 @@ export function serializeInvestigationReportHtml(report: InvestigationReport): s
     <p>This export does not recommend buys, sells, targets, or forecasts.</p>
     <ul>
       <li>Report created: <strong>${text(report.createdAt)}</strong></li>
-      <li>Evidence snapshot retrieved: <strong>${text(report.snapshot.retrievedAt)}</strong></li>
+      <li>Evidence snapshot retrieved: <strong>${text(report.snapshot.retrievedAt)}</strong>${report.isDemoFixture ? " (fixture timestamp)" : ""}</li>
       <li>Snapshot id: ${text(report.snapshot.id)}</li>
+      ${report.isDemoFixture ? `<li>Fixture scenario: <strong>${text(report.fixtureId ?? "custom")}</strong></li>` : ""}
       <li>Question: ${text(report.question)}</li>
       <li>Pair: ${text(report.pair)}</li>
     </ul>
+    ${demoBanner}
     ${staleBanner}
     <h2>Disclaimers</h2>
     <ul>${report.disclaimers.map((line) => `<li>${text(line)}</li>`).join("")}</ul>

@@ -432,6 +432,11 @@ export function normalizeMarketContext(raw: MarketRawInput): MarketContext {
       );
 
   const limitations = [
+    ...(raw.isDemoFixture
+      ? [
+          `DEMO / FIXTURE DATA: This snapshot contains deterministic fixture data for demonstration and testing (${raw.fixtureLabel ?? raw.fixtureId ?? "fixture"}). It was not retrieved from live Bitget APIs.`,
+        ]
+      : []),
     ...MARKET_CONTEXT_LIMITATIONS,
     ...raw.failures.map((failure) => `${failure.resource} failed: ${failure.message}`),
   ];
@@ -442,6 +447,9 @@ export function normalizeMarketContext(raw: MarketRawInput): MarketContext {
     pair,
     tokenSymbol,
     retrievedAt,
+    isDemoFixture: raw.isDemoFixture,
+    fixtureId: raw.fixtureId,
+    fixtureLabel: raw.fixtureLabel,
     instrument: {
       pair: instrumentPair,
       tokenSymbol: instrumentToken,

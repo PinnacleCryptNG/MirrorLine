@@ -39,6 +39,9 @@ export interface ComparisonSymbolColumn {
   tokenSymbol: string | null;
   loadStatus: ComparisonLoadStatus;
   error: string | null;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   snapshot: ReportSnapshot | null;
   contextSummary: ReportContextSummary | null;
   pack: EvidencePack | null;
@@ -55,6 +58,7 @@ export interface ComparisonReport {
   advisory: false;
   reportId: string;
   createdAt: string;
+  isDemoFixture?: boolean;
   sharedClaims: StructuredClaim[];
   freeText?: string;
   symbols: ComparisonSymbolColumn[];

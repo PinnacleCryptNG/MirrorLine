@@ -648,11 +648,22 @@ export function buildEvidencePack(
       pair: context.pair,
       tokenSymbol: token,
       retrievedAt: context.retrievedAt,
+      isDemoFixture: context.isDemoFixture,
+      fixtureId: context.fixtureId,
+      fixtureLabel: context.fixtureLabel,
     },
     items,
     summary: summarize(items),
     unknowns,
-    limitations: [...EVIDENCE_PACK_LIMITATIONS, ...context.limitations],
+    limitations: [
+      ...(context.isDemoFixture
+        ? [
+            `DEMO / FIXTURE DATA: Evidence pack derived from frozen fixture data (${context.fixtureLabel ?? context.fixtureId ?? "fixture"}). Do not use for live trading.`,
+          ]
+        : []),
+      ...EVIDENCE_PACK_LIMITATIONS,
+      ...context.limitations,
+    ],
     failures: context.failures,
   };
 }

@@ -50,6 +50,9 @@ export interface ReportSnapshot {
   pair: string;
   tokenSymbol: string;
   retrievedAt: string;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   stale: boolean;
   staleEvidenceIds: string[];
   challengeMatchesSnapshot: boolean | null;
@@ -78,6 +81,9 @@ export interface InvestigationReport {
   advisory: false;
   reportId: string;
   createdAt: string;
+  isDemoFixture?: boolean;
+  fixtureId?: string;
+  fixtureLabel?: string;
   question: string;
   requestedSymbol: string;
   pair: string;
