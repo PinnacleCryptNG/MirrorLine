@@ -7,7 +7,11 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const symbol = url.searchParams.get("symbol") ?? "rAAPL";
+    const rawSymbol = url.searchParams.get("symbol") ?? "rAAPL";
+    if (rawSymbol.length > 32) {
+      return jsonError(new Error("Symbol parameter exceeds maximum allowed length of 32 characters."));
+    }
+    const symbol = rawSymbol.slice(0, 32);
     const report = await runBitgetVerification(symbol);
     return jsonOk(report);
   } catch (error) {

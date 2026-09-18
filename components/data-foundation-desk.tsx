@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import Link from "next/link";
 import { MarketContextPanel } from "@/components/market-context-panel";
 import { EvidencePackPanel } from "@/components/evidence-pack-panel";
 import { InvestigationBriefPanel } from "@/components/investigation-brief-panel";
@@ -357,7 +358,8 @@ export function DataFoundationDesk({
             <div className="relative flex-1">
               <input
                 value={symbol}
-                onChange={(event) => setSymbol(event.target.value)}
+                onChange={(event) => setSymbol(event.target.value.slice(0, 32))}
+                maxLength={32}
                 className="h-10 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 font-mono text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors"
                 placeholder={isDemoMode ? "rAAPL, rNVDA, rTSLA" : "rAAPL or RAAPLUSDT"}
                 aria-label="rToken symbol"
@@ -1024,17 +1026,25 @@ export function DataFoundationDesk({
           <div>
             <span>Mirrorline Research Desk · Built for the Bitget AI Hackathon Genesis Season 2 using Bitget Reality rToken public APIs.</span>
           </div>
-          <div className="flex items-center gap-3 font-mono">
+          <div className="flex flex-wrap items-center gap-3 font-mono">
             <span>Free research tool</span>
             <span>·</span>
             <span>No buy/sell signals</span>
             <span>·</span>
             <span>No trade execution</span>
             <span>·</span>
+            <Link href="/privacy" className="text-[var(--text-secondary)] hover:text-[var(--accent)] hover:underline">
+              Privacy Policy
+            </Link>
+            <span>·</span>
+            <Link href="/terms" className="text-[var(--text-secondary)] hover:text-[var(--accent)] hover:underline">
+              Terms & Conditions
+            </Link>
+            <span>·</span>
             <button
               type="button"
               onClick={() => setIsHelpOpen(true)}
-              className="text-[var(--accent)] dark:text-[#86C495] hover:underline"
+              className="text-[var(--accent)] dark:text-[#86C495] hover:underline cursor-pointer"
             >
               Evaluator Guide
             </button>

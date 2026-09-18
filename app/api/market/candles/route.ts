@@ -10,9 +10,11 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const symbol = url.searchParams.get("symbol");
     const interval = url.searchParams.get("interval") ?? "1H";
-    const limit = url.searchParams.get("limit");
-    const startTime = url.searchParams.get("startTime") ?? undefined;
-    const endTime = url.searchParams.get("endTime") ?? undefined;
+    const limitParam = url.searchParams.get("limit");
+    const rawLimit = limitParam ? Number(limitParam) : 48;
+    const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(1, rawLimit), 200) : 48;
+    const startTime = url.searchParams.get("startTime")?.slice(0, 32) ?? undefined;
+    const endTime = url.searchParams.get("endTime")?.slice(0, 32) ?? undefined;
     const historical = url.searchParams.get("historical") === "true";
     if (!symbol) {
       throw new BitgetError({
@@ -22,9 +24,9 @@ export async function GET(request: Request) {
       });
     }
     const result = await getCandles({
-      symbol,
+      symbol: symbol.slice(0, 32),
       interval,
-      limit: limit ? Number(limit) : 48,
+      limit,
       startTime,
       endTime,
       historical,
