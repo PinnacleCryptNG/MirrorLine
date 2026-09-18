@@ -1,6 +1,8 @@
 import { getInterpretationChallenge } from "@/lib/challenge/get-challenge";
 import { parseThesisInput } from "@/lib/challenge/engine";
 import type { InterpretationChallenge, ThesisInput } from "@/lib/challenge/types";
+import { getComposerChallenge } from "@/lib/composer/get-challenge";
+import { validateStructuredClaim } from "@/lib/composer/validate";
 import { buildThesisRevision } from "./diff";
 import type { ThesisRevision } from "./types";
 
@@ -23,11 +25,22 @@ export function parseRevisionRequest(raw: unknown): {
   if (current) {
     return { previous: previous as InterpretationChallenge, current, sequence };
   }
+  const structuredClaims = Array.isArray(record.claims)
+    ? record.claims
+    : Array.isArray(record.structuredClaims)
+      ? record.structuredClaims
+      : undefined;
   const input = parseThesisInput(
     {
-      thesis: typeof record.thesis === "string" ? record.thesis : (previous as InterpretationChallenge).input?.thesis,
+      thesis:
+        typeof record.thesis === "string"
+          ? record.thesis
+          : typeof record.freeText === "string"
+            ? record.freeText
+            : (previous as InterpretationChallenge).input?.thesis,
       reason: record.reason,
       assumptions: record.assumptions,
+      structuredClaims,
     },
     { allowEmpty: true },
   );
@@ -43,7 +56,18 @@ export async function getThesisRevision(
     question?: string;
   },
 ): Promise<ThesisRevision> {
-  const current = await getInterpretationChallenge(symbol, options.input, { question: options.question });
+  const current = options.input.structuredClaims?.length
+    ? await getComposerChallenge(
+        symbol,
+        {
+          claims: options.input.structuredClaims.map((claim, index) => validateStructuredClaim(claim, index)),
+          freeText: options.input.thesis || undefined,
+          reason: options.input.reason,
+          assumptions: options.input.assumptions,
+        },
+        { question: options.question },
+      )
+    : await getInterpretationChallenge(symbol, options.input, { question: options.question });
   return buildThesisRevision({
     previous: options.previous,
     current,

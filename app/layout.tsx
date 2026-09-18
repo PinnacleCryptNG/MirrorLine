@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Thesis Revision Loop",
+  title: "Mirrorline · Structured Claim Composer",
   description:
-    "Milestone 6 of Mirrorline: revise an rToken thesis and compare challenges against Bitget Reality evidence. Non-advisory.",
+    "Milestone 7 of Mirrorline: compose explicit rToken claims and challenge them against Bitget Reality evidence. Non-advisory.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

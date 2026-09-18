@@ -46,6 +46,20 @@ export function matchClaimUnits(previous: ClaimUnit[], current: ClaimUnit[]): {
   const usedCurrent = new Set<number>();
   const matches: ClaimMatch[] = [];
 
+  for (const prev of previous) {
+    if (!prev.structuredClaimId) {
+      continue;
+    }
+    const curr = current.find(
+      (item) => !usedCurrent.has(item.order) && item.structuredClaimId === prev.structuredClaimId,
+    );
+    if (!curr) {
+      continue;
+    }
+    usedCurrent.add(curr.order);
+    matches.push({ previous: prev, current: curr, reason: "structuredId", score: 1 });
+  }
+
   const consider = (minScore: number, allow: (candidate: ReturnType<typeof similarity>) => boolean) => {
     for (const prev of previous) {
       if (matches.some((match) => match.previous.order === prev.order)) {

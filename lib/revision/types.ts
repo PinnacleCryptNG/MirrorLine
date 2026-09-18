@@ -86,6 +86,7 @@ export const MATCH_STRATEGY = {
   jaccard: "same source; token Jaccard similarity >= 0.55",
   levenshtein: "same source; normalized Levenshtein ratio >= 0.72",
   unmatched: "no remaining candidate met a published threshold; treated as added/removed",
+  structuredId: "same structured claim id from the composer",
 } as const;
 
 export type ClaimUnit = {
@@ -95,4 +96,5 @@ export type ClaimUnit = {
   fingerprint: string;
   tokens: string[];
   assessments: ClaimAssessment[];
+  structuredClaimId?: string;
 };

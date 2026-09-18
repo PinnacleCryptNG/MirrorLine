@@ -33,6 +33,17 @@ export interface ThesisInput {
   thesis: string;
   reason?: string;
   assumptions?: string[];
+  structuredClaims?: StructuredClaim[];
+}
+
+export interface StructuredClaim {
+  id: string;
+  kind: string;
+  fields: Record<string, string>;
+  explanation?: string;
+  assumptions?: string[];
+  createdAt: string;
+  source: "composer" | "imported-freetext";
 }
 
 export interface ChallengeEvidenceRef {
@@ -63,6 +74,7 @@ export interface ClaimAssessment {
   supportingEvidence: ChallengeEvidenceRef[];
   challengingEvidence: ChallengeEvidenceRef[];
   limitingEvidence: ChallengeEvidenceRef[];
+  structuredClaimId?: string;
 }
 
 export interface MissingItem {
@@ -113,6 +125,12 @@ export interface InterpretationChallenge {
   citations: Record<string, CitedEvidence>;
   failures: ResourceFailure[];
   limitations: string[];
+    composer?: {
+    milestone: "7-structured-claim-composer";
+    claims: StructuredClaim[];
+    renderedThesis: string;
+    freeText?: string;
+  };
 }
 
 export const CHALLENGE_LIMITATIONS = [

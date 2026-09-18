@@ -21,6 +21,9 @@ import { buildInvestigationBrief } from "@/lib/brief/generate";
 import { TENSION_IDS } from "@/lib/brief/types";
 import { buildInterpretationChallenge } from "@/lib/challenge/engine";
 import { buildThesisRevision } from "@/lib/revision/diff";
+import { buildComposerChallenge } from "@/lib/composer/challenge";
+import { createStructuredClaim } from "@/lib/composer/validate";
+import type { StructuredClaim } from "@/lib/challenge/types";
 
 export interface VerificationCheck {
   id: string;
@@ -532,6 +535,60 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
         })),
       },
     });
+
+    const stamp = pack.investigation.retrievedAt;
+    const composerClaims: StructuredClaim[] = [
+      { ...createStructuredClaim("price.change24h", 0, stamp), fields: { sign: "down" } },
+      { ...createStructuredClaim("news.catalyst", 1, stamp), fields: { attribution: "earnings" } },
+      { ...createStructuredClaim("reference.tape", 2, stamp), fields: { comparison: "cheap" } },
+      { ...createStructuredClaim("depth.book", 3, stamp), fields: { book: "reality-40" } },
+      { ...createStructuredClaim("price.direction", 4, stamp), fields: { direction: "down", timeframe: "intraday" } },
+    ];
+    const composer = buildComposerChallenge({
+      pack,
+      brief,
+      claims: composerClaims,
+      freeText: "The moon phase confirms the move.",
+    });
+    const composerIds = composer.assessments.flatMap((entry) => entry.evidenceIds);
+    const composerTraceable = composerIds.every((id) => challengeKnown.has(id));
+    const composerNews = composer.assessments.find((entry) => entry.kind === "causation" || /earnings/i.test(entry.text));
+    const composerTape = composer.assessments.find((entry) => entry.kind === "reference.tape");
+    const composerDepth = composer.assessments.find((entry) => entry.kind === "depth.reality" || /40-level/i.test(entry.text));
+    const composerIntraday = composer.assessments.find((entry) => entry.structuredClaimId === composerClaims[4]?.id);
+    const composerMoon = composer.assessments.find((entry) => /moon phase/i.test(entry.text));
+    const composerBlob = JSON.stringify({
+      assessments: composer.assessments.map((entry) => entry.reasoning),
+      limitations: composer.limitations,
+    });
+    const composerHonest =
+      composer.composer?.milestone === "7-structured-claim-composer" &&
+      composerTraceable &&
+      composerNews?.status === "unsupported" &&
+      composerTape?.status === "unsupported" &&
+      composerDepth?.status === "unsupported" &&
+      composerIntraday?.status === "unassessed" &&
+      composerMoon?.status === "unassessed" &&
+      !/should buy|price will|NYSE print showed/i.test(composerBlob);
+    checks.push({
+      id: "structured-claim-composer",
+      title: "Compose structured claims and challenge them",
+      endpoint: `composed claims → POST /api/market/composer/${symbolInput}`,
+      access: "public",
+      status: composerHonest ? "pass" : "fail",
+      detail: composerHonest
+        ? `Composer ${composer.summary.supported} supported / ${composer.summary.challenged} challenged / ${composer.summary.unsupported} unsupported / ${composer.summary.unassessed} unassessed. News, tape, and Reality depth stay unsupported. Intraday direction is unassessed.`
+        : "Composer treated a selected kind as a verified fact, lost traceability, or invented tape/news/depth.",
+      sample: {
+        summary: composer.summary,
+        kinds: composer.composer?.claims.map((claim) => claim.kind),
+        statuses: composer.assessments.map((entry) => ({
+          kind: entry.kind,
+          status: entry.status,
+          structuredClaimId: entry.structuredClaimId,
+        })),
+      },
+    });
   } catch (error) {
     checks.push({
       id: "market-context",
@@ -573,6 +630,14 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       status: "fail",
       detail: failureDetail(error),
     });
+    checks.push({
+      id: "structured-claim-composer",
+      title: "Compose structured claims and challenge them",
+      endpoint: `composed claims → POST /api/market/composer/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
   }
 
   const passed = checks.filter((check) => check.status === "pass").length;
@@ -581,7 +646,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
 
   return {
     product: "Mirrorline",
-    milestone: "6-thesis-revision-loop",
+    milestone: "7-structured-claim-composer",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -598,6 +663,7 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Investigation briefs are non-advisory. Tensions cite evidence IDs; overnight rToken quoting vs closed US equity is a tension, not a contradiction.",
       "Interpretation challenges match thesis claims with transparent rules. Unmapped language is unassessed, not false. Missing evidence does not disprove a thesis.",
       "Thesis revisions compare two challenges. Reordered or lightly edited claims keep identity when fingerprints or token overlap match. A status change is not a score.",
+      "Structured claims use explicit kinds and fields. Selecting a type does not verify the assertion. Intraday direction is unassessed because the pack only classifies 24-hour change.",
       "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`

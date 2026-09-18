@@ -682,6 +682,11 @@ export function parseThesisInput(raw: unknown, options: { allowEmpty?: boolean }
     thesis,
     reason: reason || undefined,
     assumptions: assumptions.length > 0 ? assumptions : undefined,
+    structuredClaims: Array.isArray(record.structuredClaims)
+      ? (record.structuredClaims as ThesisInput["structuredClaims"])
+      : Array.isArray(record.claims)
+        ? (record.claims as ThesisInput["structuredClaims"])
+        : undefined,
   };
 }
 
@@ -695,9 +700,13 @@ export function buildInterpretationChallenge(options: {
     thesis: options.input.thesis.trim(),
     reason: options.input.reason?.trim() || undefined,
     assumptions: normalizeAssumptions(options.input.assumptions),
+    structuredClaims: options.input.structuredClaims,
   };
   if (input.assumptions?.length === 0) {
     delete input.assumptions;
+  }
+  if (!input.structuredClaims?.length) {
+    delete input.structuredClaims;
   }
 
   const drafts: DraftAssessment[] = [];

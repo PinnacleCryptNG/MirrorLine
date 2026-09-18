@@ -111,6 +111,7 @@ export function extractClaimUnits(challenge: InterpretationChallenge): ClaimUnit
       const alreadyHasKind = last.assessments.some((item) => item.kind === assessment.kind);
       if (!alreadyHasKind) {
         last.assessments.push(assessment);
+        last.structuredClaimId = last.structuredClaimId ?? assessment.structuredClaimId;
         continue;
       }
     }
@@ -122,6 +123,7 @@ export function extractClaimUnits(challenge: InterpretationChallenge): ClaimUnit
       fingerprint,
       tokens: tokenizeFingerprint(fingerprint),
       assessments: [assessment],
+      structuredClaimId: assessment.structuredClaimId,
     });
   }
   return units;

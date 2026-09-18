@@ -2,7 +2,7 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 6 — Thesis Revision Loop** for the Bitget AI × Crypto Hackathon Genesis Season 2, built on the Bitget data foundation, market context layer, evidence pack, investigation brief, and interpretation challenge.
+This repository currently ships **Milestone 7 — Structured Claim Composer** for the Bitget AI × Crypto Hackathon Genesis Season 2.
 
 It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
@@ -14,6 +14,7 @@ It does not tell anyone what to buy or sell. It does not place orders. It does n
 - Compose a deterministic, non-advisory **investigation brief** with session context, tensions, and explicit unknowns
 - Stress-test a trader's initial interpretation with a deterministic **interpretation challenge** (supported / challenged / unsupported / unassessed)
 - Revise that thesis and **diff before/after challenges**, keeping claim identity across reorders and light edits
+- Compose **structured claims** with explicit kinds and fields, then challenge them without treating the type as proof
 - Trace each brief claim to evidence IDs, source fields, timestamps, and freshness
 - Trace each item to a Bitget source field, timestamp, and freshness window
 - Keep missing, stale, failed, and unverified data as explicit UNKNOWN or stale FACT items
@@ -68,11 +69,12 @@ Other server routes:
 - `POST /api/market/challenge/rAAPL` — interpretation challenge (`{ thesis, reason?, assumptions? }`)
 - `GET /api/market/challenge/rAAPL?thesis=...` — same challenge via query string
 - `POST /api/market/revision/rAAPL` — thesis revision diff (`{ previous, thesis?, current?, sequence? }`)
+- `POST /api/market/composer/rAAPL` — structured claim challenge (`{ claims, freeText?, reason?, assumptions? }`)
 - `GET /api/market/orderbook/rAAPL`
 
 ## Architecture
 
-Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`. The interpretation challenge lives in `lib/challenge/` and only consumes a pack plus brief. Thesis revisions live in `lib/revision/` and only diff two challenges.
+Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/`. Evidence classification lives in `lib/evidence/`. The investigation brief lives in `lib/brief/` and only consumes an `EvidencePack`. The interpretation challenge lives in `lib/challenge/`. Thesis revisions live in `lib/revision/`. Structured claims live in `lib/composer/` and render into the existing challenge engine.
 
 See `docs/BITGET.md` and `ENVIRONMENT.md`.
 
@@ -81,7 +83,8 @@ See `docs/BITGET.md` and `ENVIRONMENT.md`.
 - This is not the full multi-agent investigation pipeline and not a trade recommendation.
 - Claim matching is rule-based. Unmapped natural language is unassessed, not labeled false.
 - Missing evidence does not disprove a thesis.
-- A revision status change is not a score and is not attributed to the thesis when the evidence snapshot also changed.
+- Selecting a structured claim type does not make the assertion a verified fact.
+- Intraday or unspecified price direction is unassessed because the pack only classifies 24-hour change.
 - Reality-specific order book and platform fills require Bitget API credentials and may still need UID whitelist access.
 - Bitget session endpoints return schedules; current session is an inference from those schedules plus the calendar.
 - Company overview is Bitget metadata, not a live US exchange tape. It is never used as `referencePrice`.

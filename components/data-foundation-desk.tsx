@@ -143,11 +143,11 @@ export function DataFoundationDesk({
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 6</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Thesis Revision Loop</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 7</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Structured Claim Composer</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Challenge an rToken reading, then revise the thesis and compare before/after against the same evidence
-            snapshot. Status changes are not a score. This desk does not trade, predict, or invent a US tape.
+            Compose an rToken reading with explicit claim types, challenge them against the investigation brief, then
+            revise. Selecting a kind is not a verified fact. This desk does not trade, predict, or invent a US tape.
           </p>
         </div>
         <form

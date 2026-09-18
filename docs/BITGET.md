@@ -97,6 +97,14 @@ Claim identity uses exported thresholds: exact fingerprint, token containment, J
 
 `POST /api/market/revision/{symbol}` accepts `{ previous, thesis?, reason?, assumptions?, current?, sequence? }`. When `current` is omitted, a new challenge is gathered and then diffed (snapshot will usually change). The desk diffs against the already-loaded pack so comparisons stay on the same snapshot until the trader refreshes live data.
 
+## Structured claim composer (Milestone 7)
+
+`lib/composer/` turns explicit claim kinds and fields into sentences the existing challenge engine can score. It does not call Bitget or an LLM. Selecting a kind does not make the assertion a verified fact.
+
+Direction with an intraday or unspecified timeframe is **unassessed**, not scored against 24-hour change. Reference price, news, and Reality 40-level depth stay **unsupported** when those items are UNKNOWN — not false.
+
+`POST /api/market/composer/{symbol}` accepts `{ claims, freeText?, reason?, assumptions? }`. Optional free text is kept as written. Revision identity prefers a structured claim id, then the Milestone 6 fingerprint strategy.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

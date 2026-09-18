@@ -5,6 +5,8 @@ import { buildInterpretationChallenge } from "@/lib/challenge/engine";
 import { splitClaimText } from "@/lib/challenge/split";
 import { buildThesisRevision } from "@/lib/revision/diff";
 import { joinClaimSentences } from "@/lib/revision/claims";
+import { buildComposerChallenge } from "@/lib/composer/challenge";
+import { StructuredClaimComposer } from "@/components/structured-claim-composer";
 import { ThesisRevisionPanel } from "@/components/thesis-revision-panel";
 import type {
   AttackPoint,
@@ -12,6 +14,7 @@ import type {
   ClaimAssessmentStatus,
   InterpretationChallenge,
   MissingItem,
+  StructuredClaim,
 } from "@/lib/challenge/types";
 import type { ThesisRevision } from "@/lib/revision/types";
 import type { InvestigationBrief, CitedEvidence } from "@/lib/brief/types";
@@ -146,6 +149,9 @@ function AssessmentCard({
             needs clarification
           </span>
         ) : null}
+        {assessment.structuredClaimId ? (
+          <span className="font-data text-[10px] uppercase text-[#626B7A]">{assessment.structuredClaimId}</span>
+        ) : null}
       </div>
       <p className="mt-2 text-sm text-[#F5F7FA]">{assessment.text}</p>
       <p className="mt-2 text-sm text-[#9BA3B2]">{assessment.reasoning}</p>
@@ -189,11 +195,10 @@ export function InterpretationChallengePanel({
   pack: EvidencePack | null;
   brief: InvestigationBrief | null;
 }) {
-  const [thesis, setThesis] = useState(
-    `${symbol} rose because of earnings news and is cheap versus the US stock.`,
-  );
+  const [thesis, setThesis] = useState("");
   const [reason, setReason] = useState("");
   const [assumptions, setAssumptions] = useState("");
+  const [structuredClaims, setStructuredClaims] = useState<StructuredClaim[]>([]);
   const [addClaim, setAddClaim] = useState("");
   const [challenge, setChallenge] = useState<InterpretationChallenge | null>(null);
   const [history, setHistory] = useState<ThesisRevision[]>([]);
@@ -206,31 +211,45 @@ export function InterpretationChallengePanel({
   const snapshotStale = Boolean(
     pack && challenge && pack.investigation.retrievedAt !== challenge.retrievedAt,
   );
+  const hasInput = structuredClaims.length > 0 || Boolean(thesis.trim());
 
   const run = (asRevision: boolean) => {
     if (!pack || !brief) {
       setError("Verify live data first so the challenge can use the investigation brief and evidence pack.");
       return;
     }
-    if (!asRevision && !thesis.trim()) {
-      setError("A thesis is required for the first challenge.");
+    if (!asRevision && !hasInput) {
+      setError("Add a structured claim or optional free-text thesis before running a challenge.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const next = buildInterpretationChallenge({
-        pack,
-        brief,
-        input: {
-          thesis,
-          reason: reason.trim() || undefined,
-          assumptions: assumptions
-            .split("\n")
-            .map((line) => line.trim())
-            .filter(Boolean),
-        },
-      });
+      const next =
+        structuredClaims.length > 0
+          ? buildComposerChallenge({
+              pack,
+              brief,
+              claims: structuredClaims,
+              freeText: thesis.trim() || undefined,
+              reason: reason.trim() || undefined,
+              assumptions: assumptions
+                .split("\n")
+                .map((line) => line.trim())
+                .filter(Boolean),
+            })
+          : buildInterpretationChallenge({
+              pack,
+              brief,
+              input: {
+                thesis,
+                reason: reason.trim() || undefined,
+                assumptions: assumptions
+                  .split("\n")
+                  .map((line) => line.trim())
+                  .filter(Boolean),
+              },
+            });
       if (asRevision && challenge) {
         const revision = buildThesisRevision({
           previous: challenge,
@@ -263,12 +282,12 @@ export function InterpretationChallengePanel({
   return (
     <section className="flex flex-col gap-4">
       <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-        <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INTERPRETATION CHALLENGE · NON-ADVISORY</p>
-        <h2 className="mt-2 text-lg font-medium">Stress-test an initial reading of {symbol}</h2>
-        <p className="mt-1 text-sm text-[#9BA3B2]">
-          Submit a thesis, then revise it after the challenge. Claims are matched with transparent rules. Unmapped
-          language is unassessed, not false. A later status change is not a recommendation or a grade.
-        </p>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">STRUCTURED CLAIM COMPOSER · NON-ADVISORY</p>
+          <h2 className="mt-2 text-lg font-medium">Compose an interpretation of {symbol}</h2>
+          <p className="mt-1 text-sm text-[#9BA3B2]">
+            Add explicit claim types, then challenge them against the investigation brief. A selected kind is not a
+            verified fact. Optional free text is kept as written and is not rewritten into structured rows.
+          </p>
 
         <form
           className="mt-4 flex flex-col gap-3"
@@ -285,23 +304,32 @@ export function InterpretationChallengePanel({
               className="h-10 rounded-md border border-[#252B36] bg-[#080A0F] px-3 font-data text-sm text-[#9BA3B2]"
             />
           </label>
+          <StructuredClaimComposer claims={structuredClaims} onChange={setStructuredClaims} />
           <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-[#626B7A]">
-            Initial interpretation / thesis
+            Optional free-text thesis
             <textarea
               value={thesis}
               onChange={(event) => setThesis(event.target.value)}
-              rows={4}
+              rows={3}
               className="rounded-md border border-[#252B36] bg-[#080A0F] px-3 py-2 text-sm text-[#F5F7FA] outline-none focus:border-[#8B7CFF]"
-              placeholder="rAAPL rose because of earnings and is cheap versus Apple."
-              aria-label="Initial interpretation"
+              placeholder="Kept as written. Example: The moon phase confirms the move."
+              aria-label="Optional free-text thesis"
             />
           </label>
           {challenge ? (
             <div className="rounded-md border border-[#252B36] bg-[#080A0F] px-3 py-3">
-              <p className="text-xs uppercase tracking-wide text-[#626B7A]">Claims in this thesis</p>
+              <p className="text-xs uppercase tracking-wide text-[#626B7A]">Optional free-text claims</p>
+              <p className="mt-1 text-xs text-[#9BA3B2]">
+                Structured rows above keep their ids when you revise. This editor only changes optional free text and
+                does not rewrite those rows.
+              </p>
               <ul className="mt-2 space-y-2">
                 {sentences.length === 0 ? (
-                  <li className="text-sm text-[#9BA3B2]">No claim sentences remain. Revising will record every prior claim as removed.</li>
+                  <li className="text-sm text-[#9BA3B2]">
+                    {structuredClaims.length > 0
+                      ? "No optional free-text sentences. Structured claims are revised from the composer."
+                      : "No claim sentences remain. Revising will record every prior free-text claim as removed."}
+                  </li>
                 ) : (
                   sentences.map((sentence, index) => (
                     <li key={`claim-row-${index}`} className="flex flex-col gap-2 md:flex-row">
@@ -375,7 +403,7 @@ export function InterpretationChallengePanel({
           <div className="flex flex-wrap gap-2">
             <button
               type="submit"
-              disabled={!canRun || busy || (!challenge && !thesis.trim())}
+              disabled={!canRun || busy || (!challenge && !hasInput)}
               className="h-10 w-fit rounded-md bg-[#8B7CFF] px-4 text-sm font-medium text-[#080A0F] disabled:opacity-60"
             >
               {busy ? "Running…" : challenge ? "Revise and re-challenge" : "Run challenge"}
@@ -388,6 +416,7 @@ export function InterpretationChallengePanel({
                   setChallenge(null);
                   setHistory([]);
                   setSelectedRevisionId(null);
+                  setStructuredClaims([]);
                   setError(null);
                 }}
               >
@@ -498,9 +527,18 @@ export function InterpretationChallengePanel({
               selectedId={selectedRevisionId}
               onSelect={setSelectedRevisionId}
               onRestore={(revision) => {
-                setThesis(revision.revisedThesis.thesis);
+                setThesis(
+                  revision.currentChallenge.composer?.freeText ??
+                    (revision.currentChallenge.composer ? "" : revision.revisedThesis.thesis),
+                );
                 setReason(revision.revisedThesis.reason ?? "");
                 setAssumptions((revision.revisedThesis.assumptions ?? []).join("\n"));
+                setStructuredClaims(
+                  revision.currentChallenge.composer?.claims ??
+                    revision.revisedThesis.structuredClaims ??
+                    revision.currentChallenge.input.structuredClaims ??
+                    [],
+                );
               }}
             />
           ) : null}
