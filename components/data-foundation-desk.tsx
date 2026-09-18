@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MarketContextPanel } from "@/components/market-context-panel";
+import type { MarketContext, MarketSnapshotPayload, ResourceFailure } from "@/lib/market/types";
 
 export type CheckStatus = "pass" | "fail" | "skipped";
 
@@ -39,6 +41,21 @@ function statusColor(status: CheckStatus) {
   return "text-[#F4C95D] border-[#F4C95D]/30 bg-[#F4C95D]/10";
 }
 
+function snapshotContext(snapshot: MarketSnapshotPayload | Record<string, unknown> | null): MarketContext | null {
+  if (!snapshot || typeof snapshot !== "object") {
+    return null;
+  }
+  const context = "context" in snapshot ? snapshot.context : null;
+  return context && typeof context === "object" ? (context as MarketContext) : null;
+}
+
+function snapshotFailures(snapshot: MarketSnapshotPayload | Record<string, unknown> | null): ResourceFailure[] {
+  if (!snapshot || typeof snapshot !== "object" || !("failures" in snapshot) || !Array.isArray(snapshot.failures)) {
+    return [];
+  }
+  return snapshot.failures as ResourceFailure[];
+}
+
 export function DataFoundationDesk({
   initialSymbol,
   initialReport,
@@ -51,7 +68,7 @@ export function DataFoundationDesk({
   initialReport: VerificationReport | null;
   initialInstruments: InstrumentRow[];
   initialInstrumentTotal: number | null;
-  initialSnapshot: Record<string, unknown> | null;
+  initialSnapshot: MarketSnapshotPayload | Record<string, unknown> | null;
   initialError: string | null;
 }) {
   const [symbol, setSymbol] = useState(initialSymbol);
@@ -59,7 +76,7 @@ export function DataFoundationDesk({
   const [report, setReport] = useState<VerificationReport | null>(initialReport);
   const [instruments, setInstruments] = useState<InstrumentRow[]>(initialInstruments);
   const [instrumentTotal, setInstrumentTotal] = useState<number | null>(initialInstrumentTotal);
-  const [snapshot, setSnapshot] = useState<Record<string, unknown> | null>(initialSnapshot);
+  const [snapshot, setSnapshot] = useState<MarketSnapshotPayload | Record<string, unknown> | null>(initialSnapshot);
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
 
@@ -70,7 +87,7 @@ export function DataFoundationDesk({
       const [verifyRes, instrumentsRes, snapshotRes] = await Promise.all([
         fetch(`/api/market/verify?symbol=${encodeURIComponent(nextSymbol)}`, { cache: "no-store" }),
         fetch(
-          `/api/market/instruments?limit=12&query=${encodeURIComponent(nextQuery)}`,
+          `/api/market/instruments?query=${encodeURIComponent(nextQuery)}&limit=12`,
           { cache: "no-store" },
         ),
         fetch(`/api/market/snapshot/${encodeURIComponent(nextSymbol)}`, { cache: "no-store" }),
@@ -103,25 +120,28 @@ export function DataFoundationDesk({
     }
   };
 
-  const ticker = snapshot && typeof snapshot.ticker === "object" ? (snapshot.ticker as Record<string, unknown>) : null;
-  const session =
-    snapshot && typeof snapshot.session === "object" ? (snapshot.session as Record<string, unknown>) : null;
-
-  const change = ticker?.change24hPercentNumber;
-  const changeNumber = typeof change === "number" ? change : undefined;
-
-  const lastPrice = typeof ticker?.lastPrice === "string" ? ticker.lastPrice : "—";
+  const context = snapshotContext(snapshot);
+  const failures = snapshotFailures(snapshot);
+  const last = context?.price.last;
+  const change = context?.price.change24hPercent;
+  const session = context?.session.marketSession;
+  const changeNumber = typeof change?.value === "number" ? change.value : undefined;
+  const lastDisplay =
+    last && last.value !== null && last.status !== "missing" && last.status !== "error"
+      ? String(last.value)
+      : "—";
   const summary = useMemo(() => report?.summary, [report]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="flex flex-col gap-4 border-b border-[#252B36] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 1</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Bitget Data Foundation</h1>
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">MIRRORLINE · MILESTONE 2</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Market Context Layer</h1>
           <p className="mt-2 max-w-2xl text-sm text-[#9BA3B2]">
-            Server-side Reality rToken market data for the Bitget AI × Crypto Hackathon. This screen verifies live
-            Bitget responses. It does not trade, and it does not invent prices, depth, or market status.
+            Session-aware Bitget Reality context for investigations. Every field is labeled observed, derived, or
+            unavailable. Stale and missing values stay visible. This screen does not trade, and it does not invent a
+            US tape, reference price, or Reality 40-level depth.
           </p>
         </div>
         <form
@@ -150,17 +170,22 @@ export function DataFoundationDesk({
 
       <section className="grid gap-3 md:grid-cols-4">
         <Stat label="Discovered rTokens" value={instrumentTotal === null ? "—" : String(instrumentTotal)} />
-        <Stat label="Last price" value={lastPrice} mono />
+        <Stat
+          label="Last price"
+          value={lastDisplay}
+          mono
+          hint={last ? `${last.kind} · ${last.status}` : undefined}
+        />
         <Stat
           label="24h change"
-          value={
-            changeNumber === undefined ? "—" : `${(changeNumber * 100).toFixed(2)}%`
-          }
+          value={changeNumber === undefined ? "—" : `${(changeNumber * 100).toFixed(2)}%`}
           tone={changeNumber === undefined ? "muted" : changeNumber >= 0 ? "positive" : "negative"}
+          hint={change ? `${change.kind} · ${change.status}` : undefined}
         />
         <Stat
           label="US session"
-          value={typeof session?.marketSession === "string" ? session.marketSession : "UNKNOWN"}
+          value={typeof session?.value === "string" ? session.value : "UNKNOWN"}
+          hint={session ? `${session.kind} · ${session.status}` : undefined}
         />
       </section>
 
@@ -189,6 +214,8 @@ export function DataFoundationDesk({
           </button>
         ))}
       </section>
+
+      <MarketContextPanel context={context} failures={failures} />
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-xl border border-[#252B36] bg-[#10131A]">
@@ -272,11 +299,9 @@ export function DataFoundationDesk({
           </div>
 
           <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3 text-sm text-[#9BA3B2]">
-            <h2 className="mb-2 text-sm font-medium text-[#F5F7FA]">Known limits</h2>
+            <h2 className="mb-2 text-sm font-medium text-[#F5F7FA]">Provider notes</h2>
             <ul className="space-y-2">
-              {(report?.notes ?? [
-                "Verification has not completed yet.",
-              ]).map((note) => (
+              {(report?.notes ?? ["Verification has not completed yet."]).map((note) => (
                 <li key={note}>• {note}</li>
               ))}
             </ul>
@@ -292,11 +317,13 @@ function Stat({
   value,
   mono,
   tone = "muted",
+  hint,
 }: {
   label: string;
   value: string;
   mono?: boolean;
   tone?: "muted" | "positive" | "negative";
+  hint?: string;
 }) {
   const color =
     tone === "positive" ? "text-[#36D399]" : tone === "negative" ? "text-[#FF6B7A]" : "text-[#F5F7FA]";
@@ -304,6 +331,7 @@ function Stat({
     <div className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3">
       <p className="text-xs uppercase tracking-wide text-[#626B7A]">{label}</p>
       <p className={`mt-1 text-xl ${mono ? "font-data" : ""} ${color}`}>{value}</p>
+      {hint ? <p className="mt-1 font-data text-[11px] uppercase text-[#626B7A]">{hint}</p> : null}
     </div>
   );
 }

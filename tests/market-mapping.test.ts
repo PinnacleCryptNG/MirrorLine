@@ -26,8 +26,21 @@ describe("mapTicker", () => {
     expect(ticker.bid).toBe("332.86");
     expect(ticker.ask).toBe("332.94");
     expect(ticker.spread).toBeCloseTo(0.08);
+    expect(ticker.spreadBps).toBeCloseTo((0.08 / 332.9) * 10_000);
     expect(ticker.sourceTimestamp).toBe(new Date(1789652070212).toISOString());
     expect(ticker.change24hPercentNumber).toBeCloseTo(-0.00434);
+  });
+
+  it("leaves spread undefined when bid or ask is absent", () => {
+    const ticker = mapTicker({
+      category: "SPOT",
+      symbol: "RAAPLUSDT",
+      lastPrice: "332.9",
+    });
+    expect(ticker.lastPriceNumber).toBe(332.9);
+    expect(ticker.spread).toBeUndefined();
+    expect(ticker.spreadBps).toBeUndefined();
+    expect(ticker.sourceTimestamp).toBeUndefined();
   });
 });
 

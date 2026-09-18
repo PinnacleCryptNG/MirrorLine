@@ -49,6 +49,19 @@ Bitget `states` returns schedule windows, not a current-session flag. Mirrorline
 
 Bitget currently labels those windows `EST` with `daylightType=standard` even in September. The raw payload is stored; derivation uses New York civil time because that is the US equity session clock.
 
+## Market context (Milestone 2)
+
+`lib/market/normalize.ts` turns a gathered Bitget snapshot into labeled fields:
+
+| Field | Kind | Source |
+| --- | --- | --- |
+| last price, 24h change/volume, bid/ask, candle bars, session windows, stock-info code | observed | Bitget payloads |
+| spread, mid, spread bps, current session, weekend flag, token window match | derived | formulas over observed fields |
+| referencePrice, reference timestamp, divergence | unavailable / unverified | no US tape from Bitget |
+| Reality 40-level book | unavailable unless whitelist keys work | not inferred from the public UTA book |
+
+Ticker last prices older than 15s (vs source timestamp) are `stale`. Candle series older than 2× the requested interval are `stale`. Missing timestamps are `unknown`, not silently treated as fresh or stale.
+
 ## Intentionally not implemented
 
 - Place/cancel Reality orders

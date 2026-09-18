@@ -2,9 +2,9 @@
 
 Copy `.env.example` to `.env.local` for local development.
 
-## Required for Milestone 1 public market data
+## Required for Milestone 2 public market context
 
-None. Reality rToken discovery, tickers, candles, stock info, session states, and calendar are public Bitget UTA endpoints.
+None. Reality rToken discovery, tickers, candles, stock info, session states, calendar, and the normalized context layer use public Bitget UTA endpoints.
 
 ## Optional
 

@@ -15,6 +15,7 @@ import { getBitgetClient } from "@/lib/bitget/client";
 import { isBitgetError } from "@/lib/bitget/errors";
 import { normalizeRTokenSymbol } from "@/lib/bitget/symbols";
 import { REALITY_CANDLE_INTERVALS } from "@/lib/bitget/types";
+import { getMarketSnapshot } from "@/lib/market/context";
 
 export interface VerificationCheck {
   id: string;
@@ -294,13 +295,55 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       : null,
   });
 
+  try {
+    const snapshot = await getMarketSnapshot(symbol);
+    const ctx = snapshot.context;
+    const referenceHonest =
+      ctx.reference.referencePrice.kind === "unavailable" &&
+      ctx.reference.divergence.kind === "unavailable" &&
+      ctx.reference.referenceTimestamp.kind === "unavailable";
+    const publicBookNote = (ctx.depth.publicUtaBook.note ?? "").toLowerCase();
+    const publicBookHonest =
+      ctx.depth.publicUtaBook.kind !== "observed" ||
+      (publicBookNote.includes("not") && publicBookNote.includes("reality"));
+    checks.push({
+      id: "market-context",
+      title: "Normalize market context (observed / derived / unavailable)",
+      endpoint: `composed snapshot → GET /api/market/context/${symbolInput}`,
+      access: "public",
+      status: referenceHonest && publicBookHonest ? "pass" : "fail",
+      detail: referenceHonest
+        ? `Coverage: ${ctx.coverage.observed} observed, ${ctx.coverage.derived} derived, ${ctx.coverage.unavailable} unavailable, ${ctx.coverage.stale} stale, ${ctx.coverage.missing} missing, ${ctx.coverage.error} error. last=${ctx.price.last.value ?? "n/a"} (${ctx.price.last.kind}/${ctx.price.last.status}), spread=${ctx.bookTop.spread.value ?? "n/a"} (${ctx.bookTop.spread.kind}), session=${ctx.session.marketSession.value ?? "n/a"} (${ctx.session.marketSession.kind}). referencePrice remains ${ctx.reference.referencePrice.status}. Failures: ${ctx.failures.length}.`
+        : "Context claimed a verified reference price or divergence. Bitget does not provide a US tape, so those fields must stay unavailable.",
+      sample: {
+        coverage: ctx.coverage,
+        last: ctx.price.last,
+        spread: ctx.bookTop.spread,
+        session: ctx.session.marketSession,
+        referencePrice: ctx.reference.referencePrice,
+        divergence: ctx.reference.divergence,
+        limitations: ctx.limitations,
+        failures: ctx.failures,
+      },
+    });
+  } catch (error) {
+    checks.push({
+      id: "market-context",
+      title: "Normalize market context (observed / derived / unavailable)",
+      endpoint: `composed snapshot → GET /api/market/context/${symbolInput}`,
+      access: "public",
+      status: "fail",
+      detail: failureDetail(error),
+    });
+  }
+
   const passed = checks.filter((check) => check.status === "pass").length;
   const failed = checks.filter((check) => check.status === "fail").length;
   const skipped = checks.filter((check) => check.status === "skipped").length;
 
   return {
     product: "Mirrorline",
-    milestone: "1-bitget-data-foundation",
+    milestone: "2-market-context-layer",
     startedAt,
     finishedAt: new Date().toISOString(),
     symbol,
@@ -312,6 +355,9 @@ export async function runBitgetVerification(symbolInput = "rAAPL") {
       "Ticker bid/ask/size come from Get Tickers. Do not treat that as full book depth.",
       "Reality-specific order book and platform fills remain optional until a whitelisted API key is configured.",
       "No trading or order-execution endpoints are implemented.",
+      "Market context labels every field as observed, derived, or unavailable. Stale and missing data stay explicit.",
+      "No US tape is used. referencePrice and divergence remain unverified.",
+      "The public UTA order book is not treated as Reality 40-level depth.",
       discovery
         ? `Live discovery counted ${discovery.total} Reality instruments at verification time.`
         : "Instrument discovery did not complete.",

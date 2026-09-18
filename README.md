@@ -2,21 +2,24 @@
 
 Mirrorline is an evidence-first AI trading desk for stress-testing decisions in 24/7 Bitget Reality rToken markets.
 
-This repository currently ships **Milestone 1 — Bitget Data Foundation** for the Bitget AI × Crypto Hackathon Genesis Season 2.
+This repository currently ships **Milestone 2 — Market Context Layer** for the Bitget AI × Crypto Hackathon Genesis Season 2, built on the Milestone 1 Bitget data foundation.
 
-It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, or market status.
+It does not tell anyone what to buy or sell. It does not place orders. It does not invent prices, liquidity, news, US tape prints, or market status.
 
 ## What works now
 
-Server-side Bitget UTA/Reality market data:
+Server-side Bitget UTA/Reality market data, plus a normalized context snapshot:
 
 - Discover supported Reality rToken instruments (`isReality=yes`)
 - Retrieve ticker data: last price, 24h change, bid/ask, volume, source timestamp
 - Retrieve candle history on Bitget-supported rToken intervals
 - Retrieve stock/session metadata: stock info, US session windows, holiday calendar, company overview
+- Normalize a market context object that labels every field **observed**, **derived**, or **unavailable**
+- Derive spread, mid, session, and token-window match from Bitget fields only
+- Keep stale, missing, and failed resources explicit — no silent substitution
+- Leave `referencePrice` and `divergence` unverified (Bitget does not provide a US tape)
 - Optional order-book retrieval, with Reality 40-level depth treated as whitelist-gated
-- Timeouts, schema validation, and explicit error codes
-- A verification page plus `pnpm verify:bitget`
+- A verification desk plus `pnpm verify:bitget`
 
 ## Run locally
 
@@ -59,12 +62,13 @@ Other server routes:
 - `GET /api/market/tickers/rAAPL`
 - `GET /api/market/candles?symbol=rAAPL&interval=1H&limit=48`
 - `GET /api/market/session?symbol=rAAPL&company=true`
-- `GET /api/market/snapshot/rAAPL`
+- `GET /api/market/snapshot/rAAPL` — raw Bitget payload plus `context`
+- `GET /api/market/context/rAAPL` — normalized context only
 - `GET /api/market/orderbook/rAAPL`
 
 ## Architecture
 
-Bitget access is isolated under `lib/bitget/`. Next.js route handlers in `app/api/market/` are the only HTTP surface. The homepage is a verification desk for this milestone, not the full investigation UI.
+Bitget access stays isolated under `lib/bitget/`. Normalization lives in `lib/market/` and only consumes those getters. Next.js route handlers in `app/api/market/` are the only HTTP surface. The homepage is the verification desk for this milestone, not the full investigation UI.
 
 See `docs/BITGET.md` and `ENVIRONMENT.md`.
 
@@ -72,7 +76,8 @@ See `docs/BITGET.md` and `ENVIRONMENT.md`.
 
 - Reality-specific order book and platform fills require Bitget API credentials and may still need UID whitelist access.
 - Bitget session endpoints return schedules; current session is derived from those schedules plus the calendar.
-- Company overview is Bitget metadata, not a live US exchange tape.
+- Company overview is Bitget metadata, not a live US exchange tape. It is never used as `referencePrice`.
+- Public UTA book depth is not Reality 40-level depth.
 - No database, auth, or AI investigation engine yet. Those belong to later milestones.
 
 ## Tests

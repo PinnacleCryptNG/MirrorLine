@@ -1,4 +1,5 @@
 import { isoFromMillis } from "@/lib/utils";
+import { calculateSpread } from "@/lib/market/spread";
 import { BitgetError } from "./errors";
 import { tickerSchema } from "./schemas";
 import { normalizeRTokenSymbol, parseOptionalNumber, requireNumber } from "./symbols";
@@ -14,12 +15,9 @@ export function mapTicker(raw: unknown): RealityTicker {
   const bid = parseOptionalNumber(parsed.bid1Price);
   const ask = parseOptionalNumber(parsed.ask1Price);
   const change = parseOptionalNumber(parsed.price24hPcnt);
-  let spread: number | undefined;
-  let spreadBps: number | undefined;
-  if (bid !== undefined && ask !== undefined && lastPriceNumber !== 0) {
-    spread = ask - bid;
-    spreadBps = (spread / lastPriceNumber) * 10_000;
-  }
+  const spreadResult = calculateSpread(bid, ask, lastPriceNumber);
+  const spread = spreadResult.spread ?? undefined;
+  const spreadBps = spreadResult.spreadBps ?? undefined;
   const ts = parseOptionalNumber(parsed.ts);
 
   return {

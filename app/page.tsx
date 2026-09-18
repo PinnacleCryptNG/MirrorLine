@@ -1,8 +1,9 @@
 import { DataFoundationDesk, type InstrumentRow, type VerificationReport } from "@/components/data-foundation-desk";
 import { discoverRealityInstruments } from "@/lib/bitget/assets";
 import { isBitgetError } from "@/lib/bitget/errors";
-import { getMarketSnapshot } from "@/lib/bitget/snapshot";
+import { getMarketSnapshot } from "@/lib/market/context";
 import { runBitgetVerification } from "@/lib/bitget/verify";
+import type { MarketSnapshotPayload } from "@/lib/market/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function Page() {
   let instruments: InstrumentRow[] = [];
   let instrumentTotal: number | null = null;
   let error: string | null = null;
-  let snapshot: Record<string, unknown> | null = null;
+  let snapshot: MarketSnapshotPayload | null = null;
 
   try {
     const [verification, discovery, marketSnapshot] = await Promise.all([
@@ -22,7 +23,7 @@ export default async function Page() {
     report = verification;
     instruments = discovery.instruments;
     instrumentTotal = discovery.total;
-    snapshot = marketSnapshot as unknown as Record<string, unknown>;
+    snapshot = marketSnapshot;
   } catch (err) {
     error = isBitgetError(err)
       ? err.message

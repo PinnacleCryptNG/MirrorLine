@@ -1,5 +1,5 @@
 import { jsonError, jsonOk } from "@/lib/api/respond";
-import { getMarketSnapshot } from "@/lib/market/context";
+import { getMarketContext } from "@/lib/market/context";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +9,8 @@ export async function GET(
 ) {
   try {
     const { symbol } = await context.params;
-    const snapshot = await getMarketSnapshot(symbol);
-    return jsonOk(snapshot);
+    const marketContext = await getMarketContext(symbol);
+    return jsonOk(marketContext);
   } catch (error) {
     return jsonError(error);
   }

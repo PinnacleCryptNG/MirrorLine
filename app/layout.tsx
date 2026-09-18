@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirrorline · Bitget Data Foundation",
+  title: "Mirrorline · Market Context Layer",
   description:
-    "Milestone 1 of Mirrorline: server-side Bitget Reality rToken market data, discovery, candles, and session metadata.",
+    "Milestone 2 of Mirrorline: honest, session-aware Bitget Reality market context with observed, derived, and unavailable fields.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
