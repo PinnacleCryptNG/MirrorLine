@@ -127,7 +127,13 @@ function TensionCard({
   );
 }
 
-export function InvestigationBriefPanel({ brief }: { brief: InvestigationBrief | null }) {
+export function InvestigationBriefPanel({
+  brief,
+  hideHeader = false,
+}: {
+  brief: InvestigationBrief | null;
+  hideHeader?: boolean;
+}) {
   if (!brief) {
     return (
       <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-6 text-sm text-[#9BA3B2]">
@@ -139,13 +145,25 @@ export function InvestigationBriefPanel({ brief }: { brief: InvestigationBrief |
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
-        <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INVESTIGATION BRIEF · NON-ADVISORY</p>
-        <h2 className="mt-2 text-lg font-medium">{brief.question}</h2>
-        <p className="mt-1 font-data text-xs text-[#626B7A]">
-          {brief.tokenSymbol} · {brief.pair} · retrieved {brief.retrievedAt}
-        </p>
-      </section>
+      {!hideHeader && (
+        <section className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-4">
+          <p className="font-data text-xs tracking-[0.24em] text-[#8B7CFF]">INVESTIGATION BRIEF · NON-ADVISORY</p>
+          <h2 className="mt-2 text-lg font-medium">{brief.question}</h2>
+          <p className="mt-1 font-data text-xs text-[#626B7A]">
+            {brief.tokenSymbol} · {brief.pair} · retrieved {brief.retrievedAt}
+          </p>
+        </section>
+      )}
+
+      {/* Contradictions and key structural tensions first */}
+      {brief.tensions.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h3 className="text-sm font-medium text-[#F5F7FA]">Key Structural Tensions & Contradictions</h3>
+          {brief.tensions.map((tension) => (
+            <TensionCard key={tension.id} tension={tension} citations={brief.citations} />
+          ))}
+        </section>
+      )}
 
       <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
         <div className="border-b border-[#252B36] px-4 py-3">
@@ -154,24 +172,20 @@ export function InvestigationBriefPanel({ brief }: { brief: InvestigationBrief |
         <Paragraphs paragraphs={brief.executiveSummary} citations={brief.citations} />
       </section>
 
-      <Section section={brief.marketAndSession} citations={brief.citations} />
-      <Section section={brief.observedFacts} citations={brief.citations} />
-      <Section section={brief.derivedInferences} citations={brief.citations} />
-      <Section section={brief.assumptions} citations={brief.citations} />
-      <Section section={brief.unknowns} citations={brief.citations} />
-
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">Contradictions and tensions</h3>
-        {brief.tensions.length === 0 ? (
-          <p className="rounded-xl border border-[#252B36] bg-[#10131A] px-4 py-3 text-sm text-[#9BA3B2]">
-            No tensions were detected from the current evidence items.
-          </p>
-        ) : (
-          brief.tensions.map((tension) => (
-            <TensionCard key={tension.id} tension={tension} citations={brief.citations} />
-          ))
-        )}
-      </section>
+      {/* Detailed brief sections organized under clean disclosure */}
+      <details className="group rounded-xl border border-[#252B36] bg-[#10131A] overflow-hidden">
+        <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-xs font-medium text-[#9BA3B2] hover:bg-[#171B24] transition-colors">
+          <span className="font-data text-xs text-[#8B7CFF]">EXPLORE DETAILED BRIEF SECTIONS (Facts, Inferences, Assumptions, Unknowns)</span>
+          <span className="font-data text-[11px] text-[#8B7CFF] group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div className="border-t border-[#252B36] p-4 flex flex-col gap-4">
+          <Section section={brief.marketAndSession} citations={brief.citations} />
+          <Section section={brief.observedFacts} citations={brief.citations} />
+          <Section section={brief.derivedInferences} citations={brief.citations} />
+          <Section section={brief.assumptions} citations={brief.citations} />
+          <Section section={brief.unknowns} citations={brief.citations} />
+        </div>
+      </details>
 
       <section className="rounded-xl border border-[#252B36] bg-[#10131A]">
         <div className="border-b border-[#252B36] px-4 py-3">

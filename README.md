@@ -36,11 +36,12 @@ To evaluate Mirrorline immediately without API keys or live market movements:
    Open [http://localhost:43123](http://localhost:43123) in your browser.
 
 2. **Step A: Activate Demo Fixture Mode & Load Scenario**
-   - Click **`◆ Demo Fixture Mode`** in the header or select **`rAAPL · Regular Session Down`** from the orientation card.
+   - Click **`Try Demo Fixture (rAAPL Down)`** from the initial ready state, or switch to **`◆ Demo Fixture Mode`** in the header. You can also open **`? How it works`** to review principles and evaluator walkthrough steps anytime.
    - *Observation*: Notice the unmistakable amber **`DEMO / FIXTURE DATA`** banner, frozen timestamp (`2026-09-17T15:00:00.000Z`), and ticker stat cards.
 
 3. **Step B: Inspect Evidence Classification & Structural Tensions**
-   - Scroll to **Investigation Evidence Pack** and **Investigation Brief**.
+   - In the **Overview & Brief** tab, examine key structural tensions and evidence breakdown pills.
+   - Expand **Technical Auditability** to inspect raw Bitget fields, endpoints, and freshness.
    - *Observation*: Notice the breakdown of evidence:
      - **FACT**: 24h change (-0.43%), last price ($332.90), ticker observed 3s before snapshot.
      - **INFERENCE**: Derived session (`US_REGULAR`), tight bid-ask spread (2.4 bps).

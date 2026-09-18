@@ -4,8 +4,8 @@ Mirrorline is an evidence-first, non-advisory AI trading desk purpose-built for 
 
 ```
 Browser (Next.js Client Components)
-  ├── components/data-foundation-desk.tsx (Master Desk Controller)
-  ├── components/first-time-orientation.tsx (Judge Guide & Evidence Principles)
+  ├── components/data-foundation-desk.tsx (Master Desk Controller & Tabbed Workspace)
+  ├── components/how-mirrorline-works-modal.tsx (How Mirrorline Works & Evaluator Walkthrough Modal)
   ├── components/structured-claim-composer.tsx (Formal Claim Builder)
   ├── components/interpretation-challenge-panel.tsx (Deterministic Scoring & Revision Loop)
   ├── components/multi-symbol-comparison-panel.tsx (Independent Column Comparison)
