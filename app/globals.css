@@ -91,6 +91,118 @@ body {
   font-family: var(--font-geist-sans), Inter, system-ui, sans-serif;
 }
 
+/*
+ * The splash is progressive enhancement: it remains hidden without the inline
+ * bootstrap script, and its CSS-only fallback dismisses it if hydration fails.
+ */
+.mirrorline-loading-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+html[data-loading-splash="true"] .mirrorline-loading-splash {
+  visibility: visible;
+  animation: mirrorline-splash-safety-dismiss 0s linear 3s forwards;
+  opacity: 1;
+}
+
+.mirrorline-loading-splash--leaving {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 250ms ease, visibility 0s linear 250ms;
+}
+
+.mirrorline-loading-splash__content {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+}
+
+.mirrorline-loading-splash__mark {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 2rem;
+}
+
+.mirrorline-loading-splash__mark span {
+  display: block;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 2px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+.mirrorline-loading-splash__mark span:last-child {
+  margin-left: -1.1rem;
+  border-color: var(--highlight);
+}
+
+.mirrorline-loading-splash__eyebrow {
+  margin: 0.7rem 0 0;
+  color: var(--accent);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.mirrorline-loading-splash__label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.mirrorline-loading-splash__line {
+  width: 5rem;
+  height: 2px;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.mirrorline-loading-splash__line::after {
+  display: block;
+  width: 42%;
+  height: 100%;
+  content: "";
+  background: var(--accent);
+  animation: mirrorline-splash-line 700ms ease-in-out infinite;
+}
+
+@keyframes mirrorline-splash-line {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(240%); }
+}
+
+@keyframes mirrorline-splash-safety-dismiss {
+  to {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mirrorline-loading-splash,
+  .mirrorline-loading-splash--leaving {
+    transition: none;
+  }
+
+  html[data-loading-splash="true"] .mirrorline-loading-splash,
+  .mirrorline-loading-splash__line::after {
+    animation: none;
+  }
+}
+
 /* Custom UI Utility classes mapping variables cleanly */
 .surface-card {
   background-color: var(--bg-card);

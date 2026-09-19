@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { MirrorlineLoadingSplash } from "@/components/mirrorline-loading-splash";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -67,8 +68,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-[var(--bg-primary)] text-[var(--text-primary)]">{children}</body>
+      <body className="min-h-full bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.setAttribute('data-loading-splash', 'true');",
+          }}
+        />
+        <MirrorlineLoadingSplash />
+        {children}
+      </body>
     </html>
   );
 }
